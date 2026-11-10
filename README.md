@@ -5,6 +5,7 @@
 ## 文档
 
 - [产品需求文档](./prd.md)
+- [评审与发布记录](./review-record.md)
 - 评审入口：`index.html`
 
 ## 本地预览
