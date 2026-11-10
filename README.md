@@ -6,6 +6,7 @@
 
 - [产品需求文档](./prd.md)
 - [评审与发布记录](./review-record.md)
+- [配置菜单交互原型](./prototype/index.html)
 - 评审入口：`index.html`
 
 ## 本地预览

@@ -25,6 +25,7 @@
       <a href="#model">规则模型</a>
       <a href="#simulator">额度示意</a>
       <a href="#configuration">配置项</a>
+      <a href="prototype/">配置原型</a>
       <a href="#decisions">待决策</a>
       <a href="#prd">完整 PRD</a>
     </nav>
@@ -34,7 +35,7 @@
   <main id="main-content">
     <section class="hero" id="overview" aria-labelledby="page-title">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v0.1</div>
+        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v0.2</div>
         <h1 id="page-title">门店换新活动参与次数限制</h1>
         <p class="hero-lead">规则不绑定门店，通过活动 ID 集合匹配活动；运行时按门店独立计数。成交计一次，全额退款按原周期冲正。</p>
         <div class="hero-meta" aria-label="文档信息">
@@ -43,7 +44,8 @@
           <span><b>状态</b>草案 / 待业务评审</span>
         </div>
         <div class="hero-actions">
-          <a class="button primary" href="#simulator">查看额度逻辑</a>
+          <a class="button primary" href="prototype/">打开配置原型</a>
+          <a class="button secondary" href="#simulator">查看额度逻辑</a>
           <a class="button secondary" href="prd.md">查看 Markdown 原文</a>
         </div>
       </div>
@@ -100,9 +102,9 @@
       </div>
 
       <div class="flow" aria-label="规则执行链路">
-        <article><span>1</span><strong>活动集合规则</strong><p>全局规则或指定活动规则</p></article>
+        <article><span>1</span><strong>活动集合规则</strong><p>每条规则必须配置活动 ID</p></article>
         <i aria-hidden="true">→</i>
-        <article><span>2</span><strong>活动唯一归属</strong><p>指定规则优先，全局规则兜底</p></article>
+        <article><span>2</span><strong>活动唯一归属</strong><p>同一活动仅允许一条配置</p></article>
         <i aria-hidden="true">→</i>
         <article><span>3</span><strong>门店运行时匹配</strong><p>门店无需单独配置</p></article>
         <i aria-hidden="true">→</i>
@@ -145,9 +147,9 @@
       <div class="scope-note">
         <div>
           <span class="scope-note-label">归属规则</span>
-          <h3>一个活动在同一时间只归属一条指定活动规则</h3>
+          <h3>一个活动在所有配置中只能归属一条规则</h3>
         </div>
-        <p>全局规则自动排除已被指定规则覆盖的活动，避免同一笔成交进入两个额度池。指定规则停用后，未被子规则覆盖的活动回落到全局规则。</p>
+        <p>活动 ID 必填且全局唯一，启用和停用配置均占用活动。未纳入配置的活动不限额，但会记录校验结果；新活动需要运营手工加入。</p>
       </div>
     </section>
 
@@ -225,12 +227,7 @@
           </div>
           <div class="config-fields">
             <div class="config-field wide"><label>规则名称</label><div class="mock-input">门店换新活动日限额 · 2026 年 11 月</div></div>
-            <div class="config-field wide">
-              <label>适用范围</label>
-              <div class="segmented" aria-label="适用范围示意"><span class="selected">指定活动</span><span>全部换新活动</span></div>
-              <small>本稿要求显式选择，不以活动列表为空隐式代表全局。</small>
-            </div>
-            <div class="config-field wide"><label>活动 ID 集合</label><div class="mock-input tags"><span>ACT-20261101</span><span>ACT-20261108</span><span>ACT-20261115</span><b>+ 添加活动</b></div><small>集合内活动共用一套额度；同一活动不能重复归属于两条指定规则。</small></div>
+            <div class="config-field wide"><label>活动 ID 集合 <span class="required-mark">必填</span></label><div class="mock-input tags"><span>ACT-20261101</span><span>ACT-20261108</span><span>ACT-20261115</span><b>+ 添加活动</b></div><small>至少配置 1 个活动 ID；同一活动不能重复归属于任何其他配置，停用配置同样占用活动。</small></div>
             <div class="limit-fields">
               <div><label>每日门店总次数</label><strong>10</strong></div>
               <div><label>每月门店总次数</label><strong>200</strong></div>
@@ -240,19 +237,19 @@
               <div><label>每月 App 次数</label><strong>120</strong></div>
             </div>
           </div>
-          <div class="config-foot"><span>至少启用 1 项额度；日/月同时启用时双重校验。</span><span class="mock-action">保存规则</span></div>
+          <div class="config-foot"><span>至少启用 1 项额度；保存后所有命中活动的门店自动生效。</span><a class="mock-action" href="prototype/">打开交互原型</a></div>
         </div>
 
         <aside class="validation-card" aria-labelledby="validation-title">
           <span class="section-index">SAVE CHECKS</span>
           <h3 id="validation-title">保存前校验</h3>
           <ol class="check-list">
-            <li><span>01</span>指定活动规则必须至少选择 1 个活动</li>
+            <li><span>01</span>每条规则必须至少选择 1 个活动 ID</li>
             <li><span>02</span>活动必须存在且属于换新活动类型</li>
-            <li><span>03</span>同一活动不能在两条启用规则中重复归属</li>
-            <li><span>04</span>同一环境最多启用 1 条全局规则</li>
+            <li><span>03</span>同一活动不能出现在两条配置中，停用配置也算占用</li>
+            <li><span>04</span>额度服务异常时严格阻断，不放行</li>
             <li><span>05</span>额度必须为正整数，0 不代表停用</li>
-            <li><span>06</span>活动集合为空时自动停用，不转为全局规则</li>
+            <li><span>06</span>活动集合为空时自动停用，必须补充活动后才能启用</li>
           </ol>
         </aside>
       </div>
@@ -261,20 +258,18 @@
     <section class="section" id="decisions" aria-labelledby="decisions-title">
       <div class="section-heading">
         <div>
-          <span class="section-index">05 / 评审重点</span>
-          <h2 id="decisions-title">进入开发前需要拍板的事项</h2>
+          <span class="section-index">05 / 待确认</span>
+          <h2 id="decisions-title">剩余实施边界</h2>
         </div>
         <p>下列问题会改变计数口径或系统边界，文档已标为待确认，不写成默认结论。</p>
       </div>
       <div class="decision-table-wrap">
         <table class="decision-table">
-          <thead><tr><th>待决策项</th><th>本稿建议</th><th>影响</th><th>责任方</th></tr></thead>
+          <thead><tr><th>待确认项</th><th>当前建议</th><th>影响</th><th>责任方</th></tr></thead>
           <tbody>
-            <tr><td>“成交”以哪个订单状态和时间为准</td><td>订单中心最终成功状态及成交时间</td><td>计数时点、日/月周期归属</td><td>业务 + 订单中心</td></tr>
-            <tr><td>部分退款是否返还次数</td><td>仅全额退款返还</td><td>退款规则、顾客体验</td><td>业务</td></tr>
-            <tr><td>一单多机是否按台数计数</td><td>按订单计 1 次</td><td>门店参与量口径</td><td>业务</td></tr>
-            <tr><td>全局规则与指定规则能否叠加</td><td>不叠加；指定规则优先，全局规则兜底</td><td>额度池结构与配置理解</td><td>业务 + 产品</td></tr>
-            <tr><td>额度服务异常是否允许放行</td><td>默认阻断新参与，提示稍后重试</td><td>可用性与风控</td><td>业务 + 技术</td></tr>
+            <tr><td>单日/单月额度上限的最大值</td><td>正整数，具体上限待技术确认</td><td>输入校验和存储</td><td>技术</td></tr>
+            <tr><td>门店人员是否查看剩余额度</td><td>首期仅展示拦截提示</td><td>消费者端展示范围</td><td>业务</td></tr>
+            <tr><td>是否需要“全店总上限 + 活动集合子限额”双层规则</td><td>本期不做，按活动集合单一归属</td><td>后续规则扩展</td><td>业务 + 产品</td></tr>
           </tbody>
         </table>
       </div>
@@ -304,7 +299,7 @@
   </main>
 
   <footer class="footer">
-    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v0.1 · 草案</span></div>
+    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v0.2 · 草案</span></div>
     <p>本页为静态评审站，不连接真实活动、订单或退款系统；示例数据仅用于规则说明。<a href="review-record.md">评审与发布记录</a></p>
   </footer>
 

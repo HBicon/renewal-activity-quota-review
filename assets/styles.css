@@ -156,6 +156,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .config-field { min-width: 0; }
 .config-field.wide { grid-column: 1 / -1; }
 .config-field label, .limit-fields label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 11px; font-weight: 650; }
+.required-mark { display: inline-block; margin-left: 5px; padding: 1px 4px; border-radius: 2px; background: var(--red-soft); color: var(--red); font-size: 9px; font-weight: 650; }
 .config-field small { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .mock-input { display: flex; min-height: 42px; align-items: center; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; color: var(--ink); font-size: 12px; }
 .mock-input.tags span { padding: 3px 7px; border-radius: 3px; background: var(--blue-soft); color: var(--blue); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
@@ -168,7 +169,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .limit-fields label { margin-bottom: 2px; }
 .limit-fields strong { font-size: 19px; font-variant-numeric: tabular-nums; }
 .config-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
-.mock-action { flex: 0 0 auto; padding: 8px 13px; border-radius: 4px; background: var(--green); color: #fff; font-weight: 650; }
+.mock-action { flex: 0 0 auto; padding: 8px 13px; border-radius: 4px; background: var(--green); color: #fff; font-weight: 650; text-decoration: none; }
 .validation-card { padding: 24px; background: var(--surface-2); }
 .validation-card h3 { margin: 6px 0 17px; font-size: 20px; }
 .check-list { margin: 0; padding: 0; list-style: none; }

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：活动 ID 唯一占用、门店总额度与柜机/App 入口额度配置。">
+  <title>换新活动次数限制｜配置菜单原型</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="prototype.css?v=20261110-1">
+  <script src="prototype.js?v=20261110-1" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <header class="topbar" role="banner" aria-label="运营后台顶栏">
+    <a class="brand" href="../index.html" aria-label="返回 PRD 评审站">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="19" height="19"><path d="M4 5h7v6H4zm9 0h7v6h-7zM4 13h7v6H4zm9 0h7v6h-7z" fill="currentColor"/></svg>
+      </span>
+      <span class="brand-copy"><strong>回收运营后台</strong><small>RECYCLE OPS</small></span>
+    </a>
+    <div class="environment"><span class="environment-dot"></span>演示环境</div>
+    <div class="top-actions">
+      <a class="top-link" href="../index.html">返回 PRD 评审站</a>
+      <span class="top-divider" aria-hidden="true"></span>
+      <span class="account"><span class="avatar">HB</span><span>运营管理员</span></span>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="配置菜单">
+      <nav class="side-nav">
+        <a class="nav-item demo-link" href="#"><span class="nav-icon">⌘</span>运营工作台</a>
+        <p class="nav-group">活动管理</p>
+        <a class="nav-item demo-link" href="#"><span class="nav-icon">◇</span>活动列表</a>
+        <a class="nav-item demo-link" href="#"><span class="nav-icon">＋</span>换新活动</a>
+        <p class="nav-group">配置中心</p>
+        <a class="nav-item active" href="#" aria-current="page"><span class="nav-icon">≡</span><span>换新活动次数限制</span><b class="nav-count" id="menu-rule-count">3</b></a>
+        <a class="nav-item demo-link" href="#"><span class="nav-icon">↔</span>渠道与入口</a>
+        <a class="nav-item demo-link" href="#"><span class="nav-icon">⚙</span>系统参数</a>
+        <p class="nav-group">审计</p>
+        <a class="nav-item demo-link" href="#"><span class="nav-icon">↺</span>操作日志</a>
+      </nav>
+      <div class="sidebar-note">
+        <strong>配置不绑门店</strong>
+        <p>规则按活动 ID 匹配，所有参与活动的门店自动生效。</p>
+      </div>
+    </aside>
+
+    <main class="main" id="main-content">
+      <div class="breadcrumb" aria-label="面包屑"><span>配置中心</span><i>/</i><strong>换新活动次数限制</strong></div>
+
+      <section class="page-heading" aria-labelledby="page-title">
+        <div>
+          <div class="title-line"><h1 id="page-title">换新活动次数限制</h1><span class="draft-badge">配置原型</span></div>
+          <p>将多个活动组合为一条限额规则，按门店统计成交次数。柜机与 App 共用门店总额度，同时保留各自入口子额度。</p>
+        </div>
+        <button class="button primary" type="button" id="create-rule">
+          <span aria-hidden="true">＋</span>新建规则
+        </button>
+      </section>
+
+      <section class="scope-banner" aria-label="配置口径提示">
+        <span class="scope-icon" aria-hidden="true">i</span>
+        <div><strong>活动 ID 必填，且每个活动只能归属一条规则。</strong><p>停用配置同样占用活动；如需调整归属，须先从原规则移除活动。成交条件为订单状态“待发货”且付款状态“已付款”。</p></div>
+      </section>
+
+      <section class="metrics" aria-label="配置概览">
+        <article><span>规则总数</span><strong id="metric-rules">3</strong><small>条配置</small></article>
+        <article><span>启用中</span><strong id="metric-enabled">2</strong><small>条规则</small></article>
+        <article><span>已占用活动</span><strong id="metric-activities">5</strong><small>个活动 ID</small></article>
+        <article><span>重复占用</span><strong class="safe" id="metric-conflicts">0</strong><small>冲突活动</small></article>
+      </section>
+
+      <section class="rules-panel" aria-labelledby="rules-title">
+        <div class="panel-heading">
+          <div><span class="kicker">RULE LIST</span><h2 id="rules-title">限制规则</h2></div>
+          <span class="result-count" id="result-count">共 3 条</span>
+        </div>
+        <div class="toolbar">
+          <label class="search-box">
+            <span class="sr-only">搜索规则名称或活动 ID</span>
+            <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m13 13 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <input id="rule-search" type="search" placeholder="搜索规则名称或活动 ID">
+          </label>
+          <label class="select-wrap"><span class="sr-only">按状态筛选</span><select id="status-filter"><option value="all">全部状态</option><option value="enabled">启用中</option><option value="disabled">已停用</option></select></label>
+        </div>
+
+        <div class="table-wrap">
+          <table class="rule-table">
+            <thead><tr><th>规则名称</th><th>活动 ID</th><th>门店总次数</th><th>柜机次数</th><th>App 次数</th><th>状态</th><th>最近更新</th><th class="actions-col">操作</th></tr></thead>
+            <tbody id="rules-body"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state" hidden>
+            <strong>没有匹配的规则</strong>
+            <p>可调整搜索关键词或状态筛选后重试。</p>
+          </div>
+        </div>
+        <div class="table-foot"><span id="table-foot-count">共 3 条配置</span><span>演示数据 · 不连接真实活动中心</span></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <div class="drawer" id="rule-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+    <form id="rule-form" novalidate>
+      <header class="drawer-head">
+        <div><span class="kicker">RULE CONFIG</span><h2 id="drawer-title">新建限制规则</h2><p id="drawer-subtitle">配置活动集合与门店次数额度。</p></div>
+        <button class="icon-button" type="button" id="close-drawer" aria-label="关闭配置面板">×</button>
+      </header>
+
+      <div class="drawer-body">
+        <section class="form-section" aria-labelledby="basic-title">
+          <div class="form-section-head"><span>01</span><div><h3 id="basic-title">基础信息</h3><p>规则名称用于运营识别；活动 ID 将作为运行时的唯一匹配键。</p></div></div>
+          <label class="field"><span>规则名称 <b>*</b></span><input id="rule-name" type="text" maxlength="40" placeholder="例如：双十一换新·门店限额" autocomplete="off"><small class="field-error" id="name-error"></small></label>
+        </section>
+
+        <section class="form-section" aria-labelledby="activity-title">
+          <div class="form-section-head"><span>02</span><div><h3 id="activity-title">活动配置</h3><p>至少配置 1 个活动。已归属其他规则的活动不可选择。</p></div></div>
+          <div class="activity-picker">
+            <div class="selected-activities" id="selected-activities" aria-live="polite"></div>
+            <div class="activity-add-row">
+              <label class="activity-input-wrap"><span class="sr-only">输入或搜索活动 ID</span><input id="activity-search" type="text" placeholder="输入活动 ID 或活动名称" autocomplete="off"><kbd>Enter</kbd></label>
+              <button class="button secondary compact" type="button" id="add-activity">添加</button>
+            </div>
+            <div class="activity-options" id="activity-options" role="listbox" aria-label="可选活动"></div>
+            <small class="field-error" id="activity-error"></small>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="quota-title">
+          <div class="form-section-head"><span>03</span><div><h3 id="quota-title">次数额度</h3><p>至少启用 1 项。日/月同时启用时，需要同时满足；入口额度不能突破门店总额度。</p></div></div>
+          <small class="field-error limit-error" id="limit-error"></small>
+          <div class="quota-group total-group">
+            <div class="quota-group-head"><div><span class="group-mark total">总</span><div><strong>门店总次数</strong><small>规则内全部活动、两个入口合计</small></div></div><span class="hard-limit">硬上限</span></div>
+            <div class="quota-grid two-col">
+              <div class="quota-field" data-quota="dailyTotal"><label class="check-label"><input type="checkbox" checked>单日上限</label><div class="number-wrap"><input name="dailyTotal" type="number" min="1" step="1" value="50" aria-label="每日门店总次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="monthlyTotal"><label class="check-label"><input type="checkbox" checked>单月上限</label><div class="number-wrap"><input name="monthlyTotal" type="number" min="1" step="1" value="800" aria-label="每月门店总次数"><span>次</span></div></div>
+            </div>
+          </div>
+          <div class="quota-group">
+            <div class="quota-group-head"><div><span class="group-mark">柜</span><div><strong>柜机入口次数</strong><small>只限制柜机成交，成交后同时占用门店总次数</small></div></div></div>
+            <div class="quota-grid two-col">
+              <div class="quota-field" data-quota="dailyCabinet"><label class="check-label"><input type="checkbox" checked>单日上限</label><div class="number-wrap"><input name="dailyCabinet" type="number" min="1" step="1" value="20" aria-label="每日柜机次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="monthlyCabinet"><label class="check-label"><input type="checkbox" checked>单月上限</label><div class="number-wrap"><input name="monthlyCabinet" type="number" min="1" step="1" value="300" aria-label="每月柜机次数"><span>次</span></div></div>
+            </div>
+          </div>
+          <div class="quota-group">
+            <div class="quota-group-head"><div><span class="group-mark app">App</span><div><strong>App 入口次数</strong><small>只限制 App 成交，成交后同时占用门店总次数</small></div></div></div>
+            <div class="quota-grid two-col">
+              <div class="quota-field" data-quota="dailyApp"><label class="check-label"><input type="checkbox" checked>单日上限</label><div class="number-wrap"><input name="dailyApp" type="number" min="1" step="1" value="40" aria-label="每日 App 次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="monthlyApp"><label class="check-label"><input type="checkbox" checked>单月上限</label><div class="number-wrap"><input name="monthlyApp" type="number" min="1" step="1" value="600" aria-label="每月 App 次数"><span>次</span></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="status-title">
+          <div class="form-section-head"><span>04</span><div><h3 id="status-title">生效状态</h3><p>停用后不再限制新订单，已有计数与活动占用关系保持不变。</p></div></div>
+          <div class="status-options">
+            <label><input type="radio" name="rule-status" value="enabled" checked><span><strong>保存并启用</strong><small>立即对命中活动的门店生效</small></span></label>
+            <label><input type="radio" name="rule-status" value="disabled"><span><strong>保存为停用</strong><small>保留活动占用，后续可手动启用</small></span></label>
+          </div>
+        </section>
+      </div>
+
+      <footer class="drawer-foot">
+        <span id="save-hint">请完整填写必填项</span>
+        <div><button class="button secondary" type="button" id="cancel-drawer">取消</button><button class="button primary" type="submit" id="save-rule">保存配置</button></div>
+      </footer>
+    </form>
+  </div>
+
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
