@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="门店换新活动参与次数限制 PRD 评审站：活动集合规则、门店总数与柜机、App 分入口次数限制。">
+  <title>门店换新活动参与次数限制｜PRD 评审站</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/styles.css?v=20261110-1">
+  <script src="assets/marked.min.js?v=20261110-1" defer></script>
+  <script src="assets/app.js?v=20261110-1" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="返回项目总览">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="19" height="19"><path d="M5 4h14v5H5zm0 7h8v9H5zm10 0h4v9h-4z" fill="currentColor"/></svg>
+      </span>
+      <span class="brand-copy"><strong>换新次数限制</strong><small>REQ-20261110-001</small></span>
+    </a>
+    <nav class="topnav" aria-label="页面导航">
+      <a href="#overview" class="is-active">总览</a>
+      <a href="#model">规则模型</a>
+      <a href="#simulator">额度示意</a>
+      <a href="#configuration">配置项</a>
+      <a href="#decisions">待决策</a>
+      <a href="#prd">完整 PRD</a>
+    </nav>
+    <span class="status-pill">草案 · 待评审</span>
+  </header>
+
+  <main id="main-content">
+    <section class="hero" id="overview" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v0.1</div>
+        <h1 id="page-title">门店换新活动参与次数限制</h1>
+        <p class="hero-lead">规则不绑定门店，通过活动 ID 集合匹配活动；运行时按门店独立计数。成交计一次，全额退款按原周期冲正。</p>
+        <div class="hero-meta" aria-label="文档信息">
+          <span><b>需求 ID</b>REQ-20261110-001</span>
+          <span><b>更新</b>2026-11-10</span>
+          <span><b>状态</b>草案 / 待业务评审</span>
+        </div>
+        <div class="hero-actions">
+          <a class="button primary" href="#simulator">查看额度逻辑</a>
+          <a class="button secondary" href="prd.md">查看 Markdown 原文</a>
+        </div>
+      </div>
+      <aside class="hero-summary" aria-label="方案摘要">
+        <span class="summary-kicker">DECISION SUMMARY</span>
+        <h2>本稿要解决什么</h2>
+        <p>用一套可复用的活动集合规则，对大量且持续新增的门店做统一次数控制，同时保留柜机与 App 的独立入口子额度。</p>
+        <dl>
+          <div><dt>配置方式</dt><dd>活动集合</dd></div>
+          <div><dt>计数主体</dt><dd>单个门店</dd></div>
+          <div><dt>计数时点</dt><dd>订单成交</dd></div>
+          <div><dt>退款策略</dt><dd>全额退款冲正</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="section compact-section" aria-labelledby="principles-title">
+      <div class="section-heading">
+        <div>
+          <span class="section-index">01 / 核心判断</span>
+          <h2 id="principles-title">三条规则决定实现边界</h2>
+        </div>
+        <p>配置范围与运行时计数主体分离，是避免逐门店维护的关键。</p>
+      </div>
+      <div class="principle-grid">
+        <article class="principle-card">
+          <span class="principle-number">01</span>
+          <h3>配置不绑门店</h3>
+          <p>规则只维护活动 ID 集合。参与集合内活动的门店自动命中，新门店无需补配置。</p>
+          <span class="principle-tag">新门店自动覆盖</span>
+        </article>
+        <article class="principle-card">
+          <span class="principle-number">02</span>
+          <h3>成交只计一次</h3>
+          <p>一笔订单成交后计为一次参与，同时更新门店总次数和实际成交入口次数，不重复累加。</p>
+          <span class="principle-tag">一单 = 总次数 +1</span>
+        </article>
+        <article class="principle-card">
+          <span class="principle-number">03</span>
+          <h3>入口额度是子额度</h3>
+          <p>柜机与 App 分别计数，但都不能突破门店总次数。全额退款时两个维度同步还原。</p>
+          <span class="principle-tag">总次数是硬上限</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="model" aria-labelledby="model-title">
+      <div class="section-heading">
+        <div>
+          <span class="section-index">02 / 规则模型</span>
+          <h2 id="model-title">从配置到计数的完整链路</h2>
+        </div>
+        <p>活动集合决定“哪些活动共用额度”，门店 ID 决定“额度归属于谁”。</p>
+      </div>
+
+      <div class="flow" aria-label="规则执行链路">
+        <article><span>1</span><strong>活动集合规则</strong><p>全局规则或指定活动规则</p></article>
+        <i aria-hidden="true">→</i>
+        <article><span>2</span><strong>活动唯一归属</strong><p>指定规则优先，全局规则兜底</p></article>
+        <i aria-hidden="true">→</i>
+        <article><span>3</span><strong>门店运行时匹配</strong><p>门店无需单独配置</p></article>
+        <i aria-hidden="true">→</i>
+        <article><span>4</span><strong>双维度计数</strong><p>门店总数 + 柜机/App</p></article>
+      </div>
+
+      <div class="model-grid">
+        <article class="model-card total-card">
+          <div class="model-card-head"><span class="model-kicker">HARD LIMIT</span><span class="model-badge">硬上限</span></div>
+          <h3>门店总次数</h3>
+          <p>规则内所有活动、柜机与 App 成交订单的合计上限。日额度与月额度同时启用时，两项都必须满足。</p>
+          <ul>
+            <li>按“门店 × 规则 × 周期”独立计数</li>
+            <li>一条规则下的门店之间不共享额度</li>
+            <li>未启用表示该维度不限，但不能 0 次配置</li>
+          </ul>
+        </article>
+        <article class="model-card">
+          <div class="model-card-head"><span class="model-kicker">ENTRY LIMIT</span><span class="model-badge neutral">子额度</span></div>
+          <h3>柜机入口次数</h3>
+          <p>限制该门店通过柜机成交的次数，但不额外增加门店总额度。</p>
+          <ul>
+            <li>支持单日、单月独立配置</li>
+            <li>达到柜机上限时只拦截柜机</li>
+            <li>总次数未满时，App 仍可继续参与</li>
+          </ul>
+        </article>
+        <article class="model-card">
+          <div class="model-card-head"><span class="model-kicker">ENTRY LIMIT</span><span class="model-badge neutral">子额度</span></div>
+          <h3>App 入口次数</h3>
+          <p>限制该门店通过 App 成交的次数，与柜机额度分别统计。</p>
+          <ul>
+            <li>支持单日、单月独立配置</li>
+            <li>达到 App 上限时只拦截 App</li>
+            <li>成交后仍占用门店总次数</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="scope-note">
+        <div>
+          <span class="scope-note-label">归属规则</span>
+          <h3>一个活动在同一时间只归属一条指定活动规则</h3>
+        </div>
+        <p>全局规则自动排除已被指定规则覆盖的活动，避免同一笔成交进入两个额度池。指定规则停用后，未被子规则覆盖的活动回落到全局规则。</p>
+      </div>
+    </section>
+
+    <section class="section simulator-section" id="simulator" aria-labelledby="simulator-title">
+      <div class="section-heading">
+        <div>
+          <span class="section-index">03 / 额度示意</span>
+          <h2 id="simulator-title">试算一次柜机或 App 成交</h2>
+        </div>
+        <p>可修改示例额度，再模拟成交，观察总次数与入口次数如何共同生效。</p>
+      </div>
+
+      <div class="simulator-shell">
+        <div class="simulator-controls">
+          <div class="control-heading">
+            <div><span class="section-index">DEMO PARAMETERS</span><h3>规则参数</h3></div>
+            <button class="text-button" type="button" id="reset-simulator">重置示例</button>
+          </div>
+          <div class="number-grid">
+            <label>门店单日总次数<input id="total-limit" type="number" min="1" max="9999" step="1" value="10"></label>
+            <label>柜机单日次数<input id="cabinet-limit" type="number" min="1" max="9999" step="1" value="4"></label>
+            <label>App 单日次数<input id="app-limit" type="number" min="1" max="9999" step="1" value="8"></label>
+          </div>
+          <div class="control-actions">
+            <button class="button primary" type="button" id="simulate-cabinet">模拟柜机成交</button>
+            <button class="button secondary" type="button" id="simulate-app">模拟 App 成交</button>
+          </div>
+          <p class="demo-note">示意器仅演示产品规则：成交占用额度，额度不足立即阻断；不代表真实接口和最终交互。</p>
+        </div>
+
+        <div class="usage-panel" aria-live="polite">
+          <div class="usage-heading">
+            <div><span class="section-index">STORE QUOTA</span><h3>示例门店 · 当日</h3></div>
+            <span class="usage-status" id="usage-status">可参与</span>
+          </div>
+          <div class="usage-summary">
+            <div><span>门店总已用</span><strong><b id="total-used">0</b> / <em id="total-limit-view">10</em></strong></div>
+            <div><span>总剩余</span><strong id="total-remaining">10</strong></div>
+          </div>
+          <div class="usage-row" data-entry="total">
+            <div class="usage-row-head"><span>门店总次数</span><small><b id="total-used-row">0</b> / <em id="total-limit-row">10</em></small></div>
+            <div class="progress-track" role="progressbar" aria-label="门店总次数使用进度" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="total-progress"><span></span></div>
+          </div>
+          <div class="entry-grid">
+            <div class="usage-row" data-entry="cabinet">
+              <div class="usage-row-head"><span>柜机</span><small><b id="cabinet-used">0</b> / <em id="cabinet-limit-view">4</em></small></div>
+              <div class="progress-track" role="progressbar" aria-label="柜机次数使用进度" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" id="cabinet-progress"><span></span></div>
+              <p class="entry-remaining">剩余 <b id="cabinet-remaining">4</b> 次</p>
+            </div>
+            <div class="usage-row" data-entry="app">
+              <div class="usage-row-head"><span>App</span><small><b id="app-used">0</b> / <em id="app-limit-view">8</em></small></div>
+              <div class="progress-track" role="progressbar" aria-label="App 次数使用进度" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" id="app-progress"><span></span></div>
+              <p class="entry-remaining">剩余 <b id="app-remaining">8</b> 次</p>
+            </div>
+          </div>
+          <div class="simulator-message" id="simulator-message" role="status">尚未产生成交。可点击上方按钮开始试算。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="configuration" aria-labelledby="configuration-title">
+      <div class="section-heading">
+        <div>
+          <span class="section-index">04 / 配置设计</span>
+          <h2 id="configuration-title">运营只维护活动集合与额度</h2>
+        </div>
+        <p>页面不提供门店选择器。规则自动应用于命中活动的所有现有及新增门店。</p>
+      </div>
+
+      <div class="config-layout">
+        <div class="config-card">
+          <div class="config-card-head">
+            <div><span class="section-index">RULE FORM</span><h3>新建次数限制规则</h3></div>
+            <span class="status-pill subtle">配置示意</span>
+          </div>
+          <div class="config-fields">
+            <div class="config-field wide"><label>规则名称</label><div class="mock-input">门店换新活动日限额 · 2026 年 11 月</div></div>
+            <div class="config-field wide">
+              <label>适用范围</label>
+              <div class="segmented" aria-label="适用范围示意"><span class="selected">指定活动</span><span>全部换新活动</span></div>
+              <small>本稿要求显式选择，不以活动列表为空隐式代表全局。</small>
+            </div>
+            <div class="config-field wide"><label>活动 ID 集合</label><div class="mock-input tags"><span>ACT-20261101</span><span>ACT-20261108</span><span>ACT-20261115</span><b>+ 添加活动</b></div><small>集合内活动共用一套额度；同一活动不能重复归属于两条指定规则。</small></div>
+            <div class="limit-fields">
+              <div><label>每日门店总次数</label><strong>10</strong></div>
+              <div><label>每月门店总次数</label><strong>200</strong></div>
+              <div><label>每日柜机次数</label><strong>4</strong></div>
+              <div><label>每月柜机次数</label><strong>80</strong></div>
+              <div><label>每日 App 次数</label><strong>8</strong></div>
+              <div><label>每月 App 次数</label><strong>120</strong></div>
+            </div>
+          </div>
+          <div class="config-foot"><span>至少启用 1 项额度；日/月同时启用时双重校验。</span><span class="mock-action">保存规则</span></div>
+        </div>
+
+        <aside class="validation-card" aria-labelledby="validation-title">
+          <span class="section-index">SAVE CHECKS</span>
+          <h3 id="validation-title">保存前校验</h3>
+          <ol class="check-list">
+            <li><span>01</span>指定活动规则必须至少选择 1 个活动</li>
+            <li><span>02</span>活动必须存在且属于换新活动类型</li>
+            <li><span>03</span>同一活动不能在两条启用规则中重复归属</li>
+            <li><span>04</span>同一环境最多启用 1 条全局规则</li>
+            <li><span>05</span>额度必须为正整数，0 不代表停用</li>
+            <li><span>06</span>活动集合为空时自动停用，不转为全局规则</li>
+          </ol>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="decisions" aria-labelledby="decisions-title">
+      <div class="section-heading">
+        <div>
+          <span class="section-index">05 / 评审重点</span>
+          <h2 id="decisions-title">进入开发前需要拍板的事项</h2>
+        </div>
+        <p>下列问题会改变计数口径或系统边界，文档已标为待确认，不写成默认结论。</p>
+      </div>
+      <div class="decision-table-wrap">
+        <table class="decision-table">
+          <thead><tr><th>待决策项</th><th>本稿建议</th><th>影响</th><th>责任方</th></tr></thead>
+          <tbody>
+            <tr><td>“成交”以哪个订单状态和时间为准</td><td>订单中心最终成功状态及成交时间</td><td>计数时点、日/月周期归属</td><td>业务 + 订单中心</td></tr>
+            <tr><td>部分退款是否返还次数</td><td>仅全额退款返还</td><td>退款规则、顾客体验</td><td>业务</td></tr>
+            <tr><td>一单多机是否按台数计数</td><td>按订单计 1 次</td><td>门店参与量口径</td><td>业务</td></tr>
+            <tr><td>全局规则与指定规则能否叠加</td><td>不叠加；指定规则优先，全局规则兜底</td><td>额度池结构与配置理解</td><td>业务 + 产品</td></tr>
+            <tr><td>额度服务异常是否允许放行</td><td>默认阻断新参与，提示稍后重试</td><td>可用性与风控</td><td>业务 + 技术</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section document-section" id="prd" aria-labelledby="prd-title">
+      <div class="section-heading document-heading">
+        <div>
+          <span class="section-index">06 / 完整文档</span>
+          <h2 id="prd-title">产品需求文档</h2>
+        </div>
+        <a class="button secondary compact" href="prd.md">打开 Markdown 原文</a>
+      </div>
+      <div class="document-shell">
+        <aside class="document-aside">
+          <span class="toc-label">本文目录</span>
+          <nav id="document-toc" class="document-toc" aria-label="PRD 目录"><p class="toc-loading">正在加载目录…</p></nav>
+        </aside>
+        <article class="document-content" id="document-content" aria-live="polite">
+          <p class="toc-loading">正在加载 PRD 正文…</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v0.1 · 草案</span></div>
+    <p>本页为静态评审站，不连接真实活动、订单或退款系统；示例数据仅用于规则说明。</p>
+  </footer>
+
+  <button class="back-to-top" id="back-to-top" type="button" aria-label="返回顶部">↑</button>
+</body>
+</html>
