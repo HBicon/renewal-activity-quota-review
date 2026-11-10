@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：活动 ID 唯一占用、门店总额度与柜机/App 入口额度配置。">
+  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：单菜单入口、活动 ID 唯一占用、门店与入口次数配置、批量导入和操作日志。">
   <title>换新活动次数限制｜配置菜单原型</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="prototype.css?v=20261110-1">
-  <script src="prototype.js?v=20261110-1" defer></script>
+  <link rel="stylesheet" href="prototype.css?v=20261110-4">
+  <script src="prototype.js?v=20261110-4" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -30,16 +30,7 @@
   <div class="app-shell">
     <aside class="sidebar" aria-label="配置菜单">
       <nav class="side-nav">
-        <a class="nav-item demo-link" href="#"><span class="nav-icon">⌘</span>运营工作台</a>
-        <p class="nav-group">活动管理</p>
-        <a class="nav-item demo-link" href="#"><span class="nav-icon">◇</span>活动列表</a>
-        <a class="nav-item demo-link" href="#"><span class="nav-icon">＋</span>换新活动</a>
-        <p class="nav-group">配置中心</p>
-        <a class="nav-item active" href="#" aria-current="page"><span class="nav-icon">≡</span><span>换新活动次数限制</span><b class="nav-count" id="menu-rule-count">3</b></a>
-        <a class="nav-item demo-link" href="#"><span class="nav-icon">↔</span>渠道与入口</a>
-        <a class="nav-item demo-link" href="#"><span class="nav-icon">⚙</span>系统参数</a>
-        <p class="nav-group">审计</p>
-        <a class="nav-item demo-link" href="#"><span class="nav-icon">↺</span>操作日志</a>
+        <a class="nav-item active" href="#" aria-current="page"><span class="nav-icon" aria-hidden="true">≡</span><span>换新活动次数限制</span><b class="nav-count" id="menu-rule-count">3</b></a>
       </nav>
       <div class="sidebar-note">
         <strong>配置不绑门店</strong>
@@ -48,21 +39,26 @@
     </aside>
 
     <main class="main" id="main-content">
-      <div class="breadcrumb" aria-label="面包屑"><span>配置中心</span><i>/</i><strong>换新活动次数限制</strong></div>
+      <nav class="breadcrumb" aria-label="面包屑"><span>配置中心</span><i aria-hidden="true">/</i><strong aria-current="page">换新活动次数限制</strong></nav>
 
       <section class="page-heading" aria-labelledby="page-title">
         <div>
           <div class="title-line"><h1 id="page-title">换新活动次数限制</h1><span class="draft-badge">配置原型</span></div>
-          <p>将多个活动组合为一条限额规则，按门店统计成交次数。柜机与 App 共用门店总额度，同时保留各自入口子额度。</p>
+          <p>将多个活动组合为一条次数限制规则，按门店统计成交次数。支持批量导入，所有创建、编辑和启停变更都会写入操作日志。</p>
         </div>
-        <button class="button primary" type="button" id="create-rule">
-          <span aria-hidden="true">＋</span>新建规则
-        </button>
+        <div class="heading-actions">
+          <button class="button secondary" type="button" id="open-import">
+            <span aria-hidden="true">⇧</span>批量导入
+          </button>
+          <button class="button primary" type="button" id="create-rule">
+            <span aria-hidden="true">＋</span>新建规则
+          </button>
+        </div>
       </section>
 
       <section class="scope-banner" aria-label="配置口径提示">
         <span class="scope-icon" aria-hidden="true">i</span>
-        <div><strong>活动 ID 必填，且每个活动只能归属一条规则。</strong><p>停用配置同样占用活动；如需调整归属，须先从原规则移除活动。成交条件为订单状态“待发货”且付款状态“已付款”。</p></div>
+        <div><strong>活动 ID 集合、门店日总数量、门店月总数量为必填项。</strong><p>每个活动只能归属一条规则，停用配置同样占用活动。柜机、App 次数留空时不执行对应限制。成交条件为订单状态“待发货”且付款状态“已付款”。</p></div>
       </section>
 
       <section class="metrics" aria-label="配置概览">
@@ -88,7 +84,7 @@
 
         <div class="table-wrap">
           <table class="rule-table">
-            <thead><tr><th>规则名称</th><th>活动 ID</th><th>门店总次数</th><th>柜机次数</th><th>App 次数</th><th>状态</th><th>最近更新</th><th class="actions-col">操作</th></tr></thead>
+            <thead><tr><th>规则名称</th><th>活动 ID</th><th>门店日/月总数量</th><th>柜机日/月次数</th><th>App 日/月次数</th><th>状态</th><th>操作日志</th><th class="actions-col">操作</th></tr></thead>
             <tbody id="rules-body"></tbody>
           </table>
           <div class="empty-state" id="empty-state" hidden>
@@ -104,19 +100,19 @@
   <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
   <div class="drawer" id="rule-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
     <form id="rule-form" novalidate>
-      <header class="drawer-head">
-        <div><span class="kicker">RULE CONFIG</span><h2 id="drawer-title">新建限制规则</h2><p id="drawer-subtitle">配置活动集合与门店次数额度。</p></div>
+      <div class="drawer-head">
+        <div><span class="kicker">RULE CONFIG</span><h2 id="drawer-title">新建限制规则</h2><p id="drawer-subtitle">配置活动集合与门店次数。</p></div>
         <button class="icon-button" type="button" id="close-drawer" aria-label="关闭配置面板">×</button>
-      </header>
+      </div>
 
       <div class="drawer-body">
         <section class="form-section" aria-labelledby="basic-title">
-          <div class="form-section-head"><span>01</span><div><h3 id="basic-title">基础信息</h3><p>规则名称用于运营识别；活动 ID 将作为运行时的唯一匹配键。</p></div></div>
-          <label class="field"><span>规则名称 <b>*</b></span><input id="rule-name" type="text" maxlength="40" placeholder="例如：双十一换新·门店限额" autocomplete="off"><small class="field-error" id="name-error"></small></label>
+          <div class="form-section-head"><span>01</span><div><h3 id="basic-title">基础信息</h3><p>规则名称可选，仅用于运营识别；活动 ID 是运行时的唯一匹配键。</p></div></div>
+          <label class="field"><span>规则名称 <em class="field-optional">选填</em></span><input id="rule-name" type="text" maxlength="40" placeholder="选填，不填则按规则 ID 自动生成" autocomplete="off"></label>
         </section>
 
         <section class="form-section" aria-labelledby="activity-title">
-          <div class="form-section-head"><span>02</span><div><h3 id="activity-title">活动配置</h3><p>至少配置 1 个活动。已归属其他规则的活动不可选择。</p></div></div>
+          <div class="form-section-head"><span>02</span><div><h3 id="activity-title">活动配置（必填）</h3><p>活动 ID 集合至少配置 1 个活动。已归属其他规则的活动不可选择。</p></div></div>
           <div class="activity-picker">
             <div class="selected-activities" id="selected-activities" aria-live="polite"></div>
             <div class="activity-add-row">
@@ -129,33 +125,33 @@
         </section>
 
         <section class="form-section" aria-labelledby="quota-title">
-          <div class="form-section-head"><span>03</span><div><h3 id="quota-title">次数额度</h3><p>至少启用 1 项。日/月同时启用时，需要同时满足；入口额度不能突破门店总额度。</p></div></div>
+          <div class="form-section-head"><span>03</span><div><h3 id="quota-title">次数配置</h3><p>活动 ID 集合、门店日总数量、门店月总数量为必填；柜机、App 次数选填，未填写则不执行对应限制。</p></div></div>
           <small class="field-error limit-error" id="limit-error"></small>
           <div class="quota-group total-group">
-            <div class="quota-group-head"><div><span class="group-mark total">总</span><div><strong>门店总次数</strong><small>规则内全部活动、两个入口合计</small></div></div><span class="hard-limit">硬上限</span></div>
+            <div class="quota-group-head"><div><span class="group-mark total">总</span><div><strong>门店总次数</strong><small>规则内全部活动、两个入口合计；两项均必填</small></div></div><span class="hard-limit">硬上限</span></div>
             <div class="quota-grid two-col">
-              <div class="quota-field" data-quota="dailyTotal"><label class="check-label"><input type="checkbox" checked>单日上限</label><div class="number-wrap"><input name="dailyTotal" type="number" min="1" step="1" value="50" aria-label="每日门店总次数"><span>次</span></div></div>
-              <div class="quota-field" data-quota="monthlyTotal"><label class="check-label"><input type="checkbox" checked>单月上限</label><div class="number-wrap"><input name="monthlyTotal" type="number" min="1" step="1" value="800" aria-label="每月门店总次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="dailyTotal" data-required="true"><label class="quota-label" for="dailyTotal">门店日总数量 <b>必填</b></label><div class="number-wrap"><input id="dailyTotal" name="dailyTotal" type="number" min="1" step="1" placeholder="请输入日总数量" aria-label="门店日总数量"><span>次</span></div></div>
+              <div class="quota-field" data-quota="monthlyTotal" data-required="true"><label class="quota-label" for="monthlyTotal">门店月总数量 <b>必填</b></label><div class="number-wrap"><input id="monthlyTotal" name="monthlyTotal" type="number" min="1" step="1" placeholder="请输入月总数量" aria-label="门店月总数量"><span>次</span></div></div>
             </div>
           </div>
           <div class="quota-group">
             <div class="quota-group-head"><div><span class="group-mark">柜</span><div><strong>柜机入口次数</strong><small>只限制柜机成交，成交后同时占用门店总次数</small></div></div></div>
             <div class="quota-grid two-col">
-              <div class="quota-field" data-quota="dailyCabinet"><label class="check-label"><input type="checkbox" checked>单日上限</label><div class="number-wrap"><input name="dailyCabinet" type="number" min="1" step="1" value="20" aria-label="每日柜机次数"><span>次</span></div></div>
-              <div class="quota-field" data-quota="monthlyCabinet"><label class="check-label"><input type="checkbox" checked>单月上限</label><div class="number-wrap"><input name="monthlyCabinet" type="number" min="1" step="1" value="300" aria-label="每月柜机次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="dailyCabinet"><label class="quota-label" for="dailyCabinet">柜机日次数 <em>选填</em></label><div class="number-wrap"><input id="dailyCabinet" name="dailyCabinet" type="number" min="1" step="1" placeholder="不填写则不执行" aria-label="柜机日次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="monthlyCabinet"><label class="quota-label" for="monthlyCabinet">柜机月次数 <em>选填</em></label><div class="number-wrap"><input id="monthlyCabinet" name="monthlyCabinet" type="number" min="1" step="1" placeholder="不填写则不执行" aria-label="柜机月次数"><span>次</span></div></div>
             </div>
           </div>
           <div class="quota-group">
             <div class="quota-group-head"><div><span class="group-mark app">App</span><div><strong>App 入口次数</strong><small>只限制 App 成交，成交后同时占用门店总次数</small></div></div></div>
             <div class="quota-grid two-col">
-              <div class="quota-field" data-quota="dailyApp"><label class="check-label"><input type="checkbox" checked>单日上限</label><div class="number-wrap"><input name="dailyApp" type="number" min="1" step="1" value="40" aria-label="每日 App 次数"><span>次</span></div></div>
-              <div class="quota-field" data-quota="monthlyApp"><label class="check-label"><input type="checkbox" checked>单月上限</label><div class="number-wrap"><input name="monthlyApp" type="number" min="1" step="1" value="600" aria-label="每月 App 次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="dailyApp"><label class="quota-label" for="dailyApp">App 日次数 <em>选填</em></label><div class="number-wrap"><input id="dailyApp" name="dailyApp" type="number" min="1" step="1" placeholder="不填写则不执行" aria-label="App 日次数"><span>次</span></div></div>
+              <div class="quota-field" data-quota="monthlyApp"><label class="quota-label" for="monthlyApp">App 月次数 <em>选填</em></label><div class="number-wrap"><input id="monthlyApp" name="monthlyApp" type="number" min="1" step="1" placeholder="不填写则不执行" aria-label="App 月次数"><span>次</span></div></div>
             </div>
           </div>
         </section>
 
         <section class="form-section" aria-labelledby="status-title">
-          <div class="form-section-head"><span>04</span><div><h3 id="status-title">生效状态</h3><p>停用后不再限制新订单，已有计数与活动占用关系保持不变。</p></div></div>
+          <div class="form-section-head"><span>04</span><div><h3 id="status-title">生效状态（选填）</h3><p>未操作时默认启用；停用后不再限制新订单，已有计数与活动占用关系保持不变。</p></div></div>
           <div class="status-options">
             <label><input type="radio" name="rule-status" value="enabled" checked><span><strong>保存并启用</strong><small>立即对命中活动的门店生效</small></span></label>
             <label><input type="radio" name="rule-status" value="disabled"><span><strong>保存为停用</strong><small>保留活动占用，后续可手动启用</small></span></label>
@@ -164,10 +160,68 @@
       </div>
 
       <footer class="drawer-foot">
-        <span id="save-hint">请完整填写必填项</span>
+        <span id="save-hint">活动 ID 集合、门店日总数量、门店月总数量为必填项</span>
         <div><button class="button secondary" type="button" id="cancel-drawer">取消</button><button class="button primary" type="submit" id="save-rule">保存配置</button></div>
       </footer>
     </form>
+  </div>
+
+  <div class="drawer-backdrop" id="log-backdrop" hidden></div>
+  <div class="drawer" id="log-drawer" role="dialog" aria-modal="true" aria-labelledby="log-drawer-title" hidden>
+    <div class="log-shell">
+      <div class="drawer-head">
+        <div><span class="kicker">OPERATION LOG</span><h2 id="log-drawer-title">操作日志</h2><p id="log-drawer-subtitle">查看规则变更记录。</p></div>
+        <button class="icon-button" type="button" id="close-log-drawer" aria-label="关闭操作日志">×</button>
+      </div>
+      <div class="drawer-body log-drawer-body" id="log-drawer-body"></div>
+      <footer class="drawer-foot">
+        <span id="log-count">共 0 条记录</span>
+        <div><button class="button secondary" type="button" id="close-log-footer">关闭</button></div>
+      </footer>
+    </div>
+  </div>
+
+  <div class="drawer-backdrop" id="import-backdrop" hidden></div>
+  <div class="drawer" id="import-drawer" role="dialog" aria-modal="true" aria-labelledby="import-drawer-title" hidden>
+    <div class="import-shell">
+      <div class="drawer-head">
+        <div><span class="kicker">BULK IMPORT</span><h2 id="import-drawer-title">批量导入规则</h2><p>按 CSV 格式一次创建多条规则；整批校验通过后才允许导入。</p></div>
+        <button class="icon-button" type="button" id="close-import-drawer" aria-label="关闭批量导入">×</button>
+      </div>
+      <div class="drawer-body">
+        <section class="form-section" aria-labelledby="import-format-title">
+          <div class="form-section-head"><span>01</span><div><h3 id="import-format-title">导入格式</h3><p>规则名称、入口次数和状态可留空；活动 ID 集合、门店日总数量、门店月总数量必填。</p></div></div>
+          <div class="import-format">
+            <code role="region" aria-label="CSV 表头格式，可横向滚动" tabindex="0">规则名称,活动ID集合,门店日总数量,门店月总数量,柜机日次数,柜机月次数,App日次数,App月次数,状态</code>
+            <p>活动 ID 多个时用 <b>|</b> 分隔；状态可填“启用”或“停用”，留空默认启用。空单元格表示不执行对应入口次数限制。</p>
+          </div>
+          <div class="import-toolbar">
+            <label class="button secondary compact file-button">选择 CSV 文件<input id="import-file" type="file" accept=".csv,text/csv"></label>
+            <button class="button secondary compact" type="button" id="download-template">下载模板</button>
+            <button class="link-button" type="button" id="fill-import-sample">填入示例</button>
+          </div>
+          <label class="field"><span>CSV 内容 <b>*</b></span><textarea id="import-text" rows="8" placeholder="粘贴 CSV 内容，或选择文件后自动填入"></textarea></label>
+          <small class="field-error" id="import-error" aria-live="polite"></small>
+        </section>
+
+        <section class="form-section import-preview-section" id="import-preview-section" aria-labelledby="import-preview-title" hidden>
+          <div class="form-section-head"><span>02</span><div><h3 id="import-preview-title">校验预览</h3><p>确认活动占用、次数格式和状态后再导入。</p></div></div>
+          <div class="import-summary" id="import-summary" aria-live="polite"></div>
+          <div class="import-errors" id="import-errors" aria-live="polite" hidden></div>
+          <div class="import-table-wrap" id="import-table-wrap" role="region" aria-label="批量导入校验预览表格，可横向滚动" tabindex="0" hidden>
+            <table class="import-table">
+              <thead><tr><th>行</th><th>规则名称</th><th>活动 ID</th><th>门店日/月总数量</th><th>柜机日/月次数</th><th>App 日/月次数</th><th>状态</th></tr></thead>
+              <tbody id="import-preview-body"></tbody>
+            </table>
+            <p class="import-more" id="import-more" hidden></p>
+          </div>
+        </section>
+      </div>
+      <footer class="drawer-foot">
+        <span id="import-hint">支持粘贴 CSV 或上传文件，校验通过后整批导入</span>
+        <div><button class="button secondary" type="button" id="cancel-import">取消</button><button class="button secondary" type="button" id="preview-import">校验并预览</button><button class="button primary" type="button" id="confirm-import" disabled>确认导入</button></div>
+      </footer>
+    </div>
   </div>
 
   <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>

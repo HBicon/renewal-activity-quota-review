@@ -71,7 +71,7 @@
     dom.appLimitView.textContent = simulator.limits.app;
     dom.appRemaining.textContent = appRemaining;
 
-    dom.status.textContent = exhausted ? '总额度已用完' : '可参与';
+    dom.status.textContent = exhausted ? '门店总次数已用完' : '可参与';
     dom.status.classList.toggle('blocked', exhausted);
 
     updateProgress(dom.totalProgress, totalUsed, simulator.limits.total);
@@ -165,6 +165,11 @@
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const markdown = await response.text();
       content.innerHTML = window.marked.parse(markdown, { gfm: true, breaks: false });
+      $$('pre', content).forEach((block, index) => {
+        block.tabIndex = 0;
+        block.setAttribute('role', 'region');
+        block.setAttribute('aria-label', `代码示例 ${index + 1}，可横向滚动`);
+      });
       buildToc(content);
     } catch (error) {
       content.innerHTML = '<p>PRD 正文加载失败，请使用页面上方“Markdown 原文”入口阅读。</p>';
@@ -174,7 +179,7 @@
 
   loadPrd();
 
-  const topLinks = $$('.topnav a');
+  const topLinks = $$('.topnav a').filter((link) => link.getAttribute('href')?.startsWith('#'));
   const topSections = topLinks.map((link) => $(link.getAttribute('href'))).filter(Boolean);
   const updateTopNav = () => {
     const current = [...topSections].reverse().find((section) => section.getBoundingClientRect().top <= 120);

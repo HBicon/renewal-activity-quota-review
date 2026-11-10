@@ -82,7 +82,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .principle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .principle-card { position: relative; min-height: 228px; padding: 25px 24px 20px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
 .principle-card:hover { border-color: var(--line-strong); }
-.principle-number { position: absolute; right: 18px; top: 9px; color: #edf0f2; font-size: 64px; font-weight: 800; line-height: 1; }
+.principle-number { position: absolute; right: 18px; top: 9px; color: #858f97; font-size: 64px; font-weight: 800; line-height: 1; }
 .principle-card h3 { position: relative; margin: 18px 0 10px; font-size: 20px; }
 .principle-card p { position: relative; margin: 0; color: var(--muted); font-size: 14px; }
 .principle-tag { position: absolute; left: 24px; bottom: 20px; display: inline-block; padding: 4px 8px; border-radius: 3px; background: var(--green-soft); color: var(--green-dark); font-size: 11px; font-weight: 650; }
@@ -157,6 +157,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .config-field.wide { grid-column: 1 / -1; }
 .config-field label, .limit-fields label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 11px; font-weight: 650; }
 .required-mark { display: inline-block; margin-left: 5px; padding: 1px 4px; border-radius: 2px; background: var(--red-soft); color: var(--red); font-size: 9px; font-weight: 650; }
+.optional-mark { display: inline-block; margin-left: 5px; padding: 1px 4px; border-radius: 2px; background: #eef1f3; color: #55616b; font-size: 9px; font-weight: 650; }
 .config-field small { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .mock-input { display: flex; min-height: 42px; align-items: center; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; color: var(--ink); font-size: 12px; }
 .mock-input.tags span { padding: 3px 7px; border-radius: 3px; background: var(--blue-soft); color: var(--blue); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
