@@ -222,6 +222,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .status-options span { display: block; }
 .status-options strong { display: block; font-size: 10px; }
 .status-options small { display: block; margin-top: 2px; color: var(--muted); font-size: 8px; line-height: 1.5; }
+.activation-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; padding: 11px 12px; border: 1px solid #c9dfd8; border-radius: 4px; background: #f5faf8; }
+.activation-note-mark { flex: 0 0 auto; padding: 2px 6px; border-radius: 3px; background: var(--green-soft); color: var(--green-dark); font-size: 8px; font-weight: 750; }
+.activation-note strong { display: block; color: var(--ink); font-size: 10px; }
+.activation-note p { margin: 3px 0 0; color: var(--ink-2); font-size: 9px; line-height: 1.65; }
 .drawer-foot { min-height: 66px; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 13px 27px; border-top: 1px solid var(--line); background: #fff; }
 .drawer-foot > span { color: var(--muted); font-size: 9px; }
 .drawer-foot > div { display: flex; gap: 7px; }

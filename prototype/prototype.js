@@ -163,14 +163,27 @@
     return [{ field: label, before: formatConfigValue(key, before[key]), after: formatConfigValue(key, after[key]) }];
   });
 
-  const makeLog = (action, changes, note = '') => ({
+  const makeLog = (action, changes, note = '', operator = OPERATOR) => ({
     id: `LOG-${String(++logSequence).padStart(4, '0')}`,
     action,
-    operator: OPERATOR,
+    operator,
     time: nowText(),
     note,
     changes
   });
+
+  const makeActivationLog = (rule, trigger, activityIds = rule.activities) => {
+    const date = new Date();
+    const pad = (value) => String(value).padStart(2, '0');
+    const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const month = `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+    return makeLog('生效初始化', [
+      { field: '初始化周期', before: '—', after: `${day}（日）、${month}（月）` },
+      { field: '活动范围', before: '—', after: activityIds.join('、') },
+      { field: '统计截至', before: '—', after: '规则生效时刻（不含）' },
+      { field: '处理结果', before: '—', after: '成功，期初用量已纳入当前次数' }
+    ], `${trigger}：回溯当前日/月历史成交并补建在途预占；查询失败时阻断生效，重复执行不重复计数。`, '系统任务');
+  };
 
   const summarizeLog = (log) => {
     if (!log?.changes?.length) return '无字段变化';
@@ -380,7 +393,7 @@
         return;
       }
       const value = Number(rawValue);
-      if (!Number.isInteger(value) || value <= 0) {
+      if (!Number.isSafeInteger(value) || value <= 0) {
         invalid = true;
         wrap.classList.add('invalid');
       }
@@ -444,14 +457,22 @@
       return;
     }
     const log = makeLog(previousRule ? '编辑规则' : '创建规则', changes);
-    payload.updated = log.time;
-    payload.logs = [log, ...(previousRule?.logs || [])];
+    const addedActivities = previousRule ? payload.activities.filter((activityId) => !previousRule.activities.includes(activityId)) : payload.activities;
+    const needsActivationInit = status === 'enabled' && (!previousRule || previousRule.status !== 'enabled' || addedActivities.length > 0);
+    const activationTrigger = !previousRule ? '首次启用' : previousRule.status !== 'enabled' ? '停用后重新启用' : '已启用规则新增活动';
+    const initLog = needsActivationInit ? makeActivationLog(payload, activationTrigger, addedActivities) : null;
+    payload.logs = [initLog, log, ...(previousRule?.logs || [])].filter(Boolean);
+    payload.updated = payload.logs[0].time;
     if (previousRule) {
       rules = rules.map((rule) => rule.id === activeRuleId ? payload : rule);
-      toast(`已更新“${payload.name}”，变更已写入操作日志。`);
+      toast(initLog
+        ? `已更新“${payload.name}”，并完成${activationTrigger}的当前日/月期初初始化。`
+        : `已更新“${payload.name}”，变更已写入操作日志。`);
     } else {
       rules = [payload, ...rules];
-      toast(`已创建“${payload.name}”，并记录初始配置日志。`);
+      toast(initLog
+        ? `已创建“${payload.name}”，完成当前日/月期初初始化后生效。`
+        : `已创建“${payload.name}”，并记录初始配置日志。`);
     }
     renderRules();
     closeDrawer();
@@ -467,11 +488,14 @@
       before: statusLabel(before),
       after: statusLabel(rule.status)
     }], '启停只影响后续新订单，历史计数和活动占用关系保持不变。');
-    rule.logs = [log, ...(rule.logs || [])];
-    rule.updated = log.time;
+    const initLog = rule.status === 'enabled' ? makeActivationLog(rule, '停用后重新启用') : null;
+    rule.logs = [initLog, log, ...(rule.logs || [])].filter(Boolean);
+    rule.updated = rule.logs[0].time;
     rule.updater = OPERATOR;
     renderRules();
-    toast(`“${displayName(rule)}”已${rule.status === 'enabled' ? '启用' : '停用'}，变更已写入操作日志。`);
+    toast(initLog
+      ? `“${displayName(rule)}”已完成当前日/月期初初始化并启用。`
+      : `“${displayName(rule)}”已停用，变更已写入操作日志。`);
   };
 
   const closeLogDrawer = () => {
@@ -615,7 +639,7 @@
           return null;
         }
         const number = Number(value);
-        if (!Number.isInteger(number) || number <= 0) {
+        if (!Number.isSafeInteger(number) || number <= 0) {
           errors.add(`第 ${line} 行：${label}必须为大于 0 的整数。`);
           return null;
         }
@@ -748,14 +772,15 @@
         logs: []
       };
       const log = makeLog('批量导入创建', createChanges(rule), `导入批次 ${batchId}`);
-      rule.updated = log.time;
-      rule.logs = [log];
+      const initLog = rule.status === 'enabled' ? makeActivationLog(rule, `批量导入启用（${batchId}）`) : null;
+      rule.logs = [initLog, log].filter(Boolean);
+      rule.updated = rule.logs[0].time;
       return rule;
     });
     rules = [...importedRules, ...rules];
     renderRules();
     closeImportDrawer(true);
-    toast(`已通过 ${batchId} 导入 ${importedRules.length} 条规则，并写入操作日志。`);
+    toast(`已通过 ${batchId} 导入 ${importedRules.length} 条规则；启用规则已完成当前日/月期初初始化。`);
   };
 
   const downloadTemplate = () => {

@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：单菜单入口、活动 ID 唯一占用、门店与入口次数配置、批量导入和操作日志。">
+  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：单菜单入口、活动 ID 唯一占用、生效期初用量初始化、门店与入口次数配置、批量导入和操作日志。">
   <title>换新活动次数限制｜配置菜单原型</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="prototype.css?v=20261110-4">
-  <script src="prototype.js?v=20261110-4" defer></script>
+  <link rel="stylesheet" href="prototype.css?v=20261110-5">
+  <script src="prototype.js?v=20261110-5" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -44,7 +44,7 @@
       <section class="page-heading" aria-labelledby="page-title">
         <div>
           <div class="title-line"><h1 id="page-title">换新活动次数限制</h1><span class="draft-badge">配置原型</span></div>
-          <p>将多个活动组合为一条次数限制规则，按门店统计成交次数。支持批量导入，所有创建、编辑和启停变更都会写入操作日志。</p>
+          <p>将多个活动组合为一条次数限制规则，按门店统计成交次数。启用时回溯当前日/月历史成交生成期初用量，避免中途配置绕过上限。</p>
         </div>
         <div class="heading-actions">
           <button class="button secondary" type="button" id="open-import">
@@ -58,7 +58,7 @@
 
       <section class="scope-banner" aria-label="配置口径提示">
         <span class="scope-icon" aria-hidden="true">i</span>
-        <div><strong>活动 ID 集合、门店日总数量、门店月总数量为必填项。</strong><p>每个活动只能归属一条规则，停用配置同样占用活动。柜机、App 次数留空时不执行对应限制。成交条件为订单状态“待发货”且付款状态“已付款”。</p></div>
+        <div><strong>活动 ID 集合、门店日总数量、门店月总数量为必填项。</strong><p>首次启用、重新启用或新增活动时，按当前自然日和自然月回溯历史成交并生成期初用量；初始化失败不得生效。柜机、App 次数留空时不执行对应限制；门店端不展示剩余次数。</p></div>
       </section>
 
       <section class="metrics" aria-label="配置概览">
@@ -153,8 +153,12 @@
         <section class="form-section" aria-labelledby="status-title">
           <div class="form-section-head"><span>04</span><div><h3 id="status-title">生效状态（选填）</h3><p>未操作时默认启用；停用后不再限制新订单，已有计数与活动占用关系保持不变。</p></div></div>
           <div class="status-options">
-            <label><input type="radio" name="rule-status" value="enabled" checked><span><strong>保存并启用</strong><small>立即对命中活动的门店生效</small></span></label>
+            <label><input type="radio" name="rule-status" value="enabled" checked><span><strong>保存并启用</strong><small>先初始化当前日/月期初用量，再对命中门店生效</small></span></label>
             <label><input type="radio" name="rule-status" value="disabled"><span><strong>保存为停用</strong><small>保留活动占用，后续可手动启用</small></span></label>
+          </div>
+          <div class="activation-note" role="note">
+            <span class="activation-note-mark">期初</span>
+            <div><strong>启用前必做：当前日/月生效初始化</strong><p>系统按规则活动集合，回溯所有命中门店在当前自然日、自然月的历史成交，补建在途预占后生成期初用量。查询失败、部分门店失败或预占补建失败时不得切换为生效，不会按 0 次放行。</p></div>
           </div>
         </section>
       </div>
