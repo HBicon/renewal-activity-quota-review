@@ -309,10 +309,15 @@
   const monthlyText = (value) => value ? `${value} / 月` : '不执行';
 
   const ordersForRule = (ruleId) => participationOrders.filter((order) => order.ruleId === ruleId);
+  const ORDER_DESTINATIONS = {
+    cabinet: { label: '柜机下单', enumValue: 'CABINET_ORDER' },
+    app: { label: '软件下单', enumValue: 'SOFTWARE_ORDER' }
+  };
+  const orderDestinationLabel = (order) => ORDER_DESTINATIONS[order.destination || order.entry]?.label || '未知归宿';
 
   const participationCount = (orders, period, entry = 'total') => {
     const inPeriod = orders.filter((order) => period === 'month' || order[period]);
-    const entryOrders = entry === 'total' ? inPeriod : inPeriod.filter((order) => order.entry === entry);
+    const entryOrders = entry === 'total' ? inPeriod : inPeriod.filter((order) => (order.destination || order.entry) === entry);
     const frozen = entryOrders.filter((order) => order.status === 'frozen').length;
     const participated = entryOrders.filter((order) => order.status === 'participated').length;
     return { total: frozen + participated, frozen, participated };
@@ -786,7 +791,8 @@
   const renderOrderDetails = (rule, storeId) => {
     const storeOrders = ordersForRule(rule.id).filter((order) => order.storeId === storeId);
     const storeName = storeOrders[0]?.storeName || '未知门店';
-    const uniqueOrders = [...new Map(storeOrders.map((order) => [order.orderId, order])).values()];
+    const uniqueOrders = [...new Map(storeOrders.map((order) => [order.orderId, order])).values()]
+      .filter((order) => ORDER_DESTINATIONS[order.destination || order.entry]);
     $('#order-modal-subtitle').textContent = `${storeName} · 仅展示冻结中与已参与订单`;
     $('#order-store-name').textContent = storeName;
     $('#order-rule-name').textContent = `${displayName(rule)}（${rule.id}）`;
@@ -798,6 +804,7 @@
       <tr>
         <td><span class="detail-store-name">${escapeHtml(storeName)}</span></td>
         <td><span class="order-number">${escapeHtml(order.orderId)}</span></td>
+        <td><span class="order-destination ${order.destination || order.entry}" data-destination="${ORDER_DESTINATIONS[order.destination || order.entry].enumValue}">${orderDestinationLabel(order)}</span></td>
         <td><span class="participation-badge ${order.status}">${order.status === 'frozen' ? '冻结中' : '已参与'}</span></td>
       </tr>`).join('');
   };

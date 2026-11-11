@@ -308,7 +308,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .modal-table-wrap[hidden] { display: none; }
 .detail-table { width: 100%; border-collapse: collapse; font-size: 10px; }
 .participation-table { min-width: 1240px; }
-.order-table { min-width: 520px; }
+.order-table { min-width: 610px; }
 .detail-table th { padding: 9px 10px; border-bottom: 1px solid var(--line); background: #f8fafb; color: var(--muted); font-size: 8px; font-weight: 650; text-align: left; white-space: nowrap; }
 .detail-table td { padding: 10px; border-bottom: 1px solid #edf0f2; color: var(--ink-2); vertical-align: middle; }
 .detail-table tbody tr:last-child td { border-bottom: 0; }
@@ -320,6 +320,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .detail-order-button { padding: 0; border: 0; border-bottom: 1px solid transparent; background: transparent; color: var(--green-dark); cursor: pointer; font-size: 9px; font-weight: 650; white-space: nowrap; }
 .detail-order-button:hover { border-bottom-color: currentColor; }
 .order-number { color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; }
+.order-destination { display: inline-flex; align-items: center; padding: 3px 7px; border: 1px solid #d7e0e8; border-radius: 3px; background: #f7f9fb; color: #45596b; font-size: 9px; font-weight: 650; white-space: nowrap; }
+.order-destination.cabinet { border-color: #d6e3dc; background: #f2f8f5; color: #2c6a51; }
+.order-destination.app { border-color: #d8e2ef; background: #f2f6fb; color: #3f6488; }
 .participation-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border-radius: 3px; font-size: 9px; font-weight: 650; white-space: nowrap; }
 .participation-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .participation-badge.frozen { background: var(--amber-soft); color: var(--amber); }
@@ -385,6 +388,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .modal-foot { align-items: stretch; flex-direction: column; }
   .modal-foot > div { display: grid; grid-template-columns: 1fr 1fr; }
   .participation-table { min-width: 1180px; }
+  .order-table { display: block; min-width: 0; }
+  .order-table thead { display: none; }
+  .order-table tbody { display: grid; gap: 8px; padding: 8px; background: #f8fafb; }
+  .order-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "store status" "order destination"; gap: 7px 10px; padding: 11px; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+  .order-table td { display: block; padding: 0; border: 0; }
+  .order-table td:nth-child(1) { grid-area: store; }
+  .order-table td:nth-child(2) { grid-area: order; align-self: center; }
+  .order-table td:nth-child(3) { grid-area: destination; justify-self: end; align-self: center; }
+  .order-table td:nth-child(4) { grid-area: status; justify-self: end; }
+  .order-table td:nth-child(2)::before, .order-table td:nth-child(3)::before { margin-right: 4px; color: var(--muted); font-size: 8px; font-weight: 500; }
+  .order-table td:nth-child(2)::before { content: "订单号"; }
+  .order-table td:nth-child(3)::before { content: "归宿"; }
+  .order-table tbody tr:hover td { background: transparent; }
+  .order-table .detail-store-name { font-size: 10px; line-height: 1.45; }
+  .order-table .order-number { font-size: 9px; line-height: 1.45; overflow-wrap: anywhere; }
+  .order-table .order-destination, .order-table .participation-badge { padding: 3px 6px; font-size: 9px; }
   .toast-region { left: 16px; right: 16px; bottom: 16px; }
   .toast { min-width: 0; max-width: none; }
 }

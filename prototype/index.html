@@ -6,8 +6,8 @@
   <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：支持日、自然周、月三周期次数限制，覆盖活动 ID 唯一占用、执行中初始化、参与详情、订单明细、批量导入和操作日志。">
   <title>换新活动次数限制｜配置菜单原型</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="prototype.css?v=20261111-7">
-  <script src="prototype.js?v=20261111-7" defer></script>
+  <link rel="stylesheet" href="prototype.css?v=20261111-8">
+  <script src="prototype.js?v=20261111-8" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -275,7 +275,7 @@
         <div>
           <span class="kicker">ORDER DETAIL</span>
           <h2 id="order-modal-title">订单明细</h2>
-          <p id="order-modal-subtitle">查看当前门店仍占用次数的订单。</p>
+          <p id="order-modal-subtitle">查看当前门店仍占用次数的订单；订单归宿分为柜机下单与软件下单。</p>
         </div>
         <button class="icon-button" type="button" id="close-order" aria-label="关闭订单明细">×</button>
       </div>
@@ -285,11 +285,11 @@
           <div><span>所属规则</span><strong id="order-rule-name">—</strong></div>
           <div><span>有效订单</span><strong id="order-total-count">0 笔</strong></div>
         </div>
-        <p class="modal-note"><b>范围：</b>当前自然周与当前自然月并集内仍占用次数的订单，同一订单号只展示一次；状态仅包含冻结中与已参与。</p>
+        <p class="modal-note"><b>范围：</b>当前自然周与当前自然月并集内仍占用次数的订单，同一订单号只展示一次；状态仅包含冻结中与已参与。订单归宿为“柜机下单”或“软件下单”，App 入口产生的订单统一展示为软件下单。</p>
         <div class="modal-table-wrap" id="order-table-wrap" role="region" aria-label="门店参与订单明细表格" tabindex="0" hidden>
           <table class="detail-table order-table">
             <caption class="sr-only">当前门店仍占用次数的参与订单</caption>
-            <thead><tr><th>门店名称</th><th>订单号</th><th>参与状态</th></tr></thead>
+            <thead><tr><th>门店名称</th><th>订单号</th><th>订单归宿</th><th>参与状态</th></tr></thead>
             <tbody id="order-body"></tbody>
           </table>
         </div>
