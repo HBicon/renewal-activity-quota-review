@@ -215,6 +215,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .hard-limit { padding: 2px 6px; border-radius: 2px; background: var(--green-soft); color: var(--green-dark); font-size: 8px; font-weight: 650; }
 .quota-grid { display: grid; gap: 8px; }
 .quota-grid.two-col { grid-template-columns: 1fr 1fr; }
+.quota-grid.three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .quota-field { padding: 8px 9px; border: 1px solid var(--line); border-radius: 3px; background: #fff; }
 .quota-label { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 5px; color: var(--ink-2); font-size: 9px; font-weight: 650; }
 .quota-label b, .quota-label em { flex: 0 0 auto; padding: 1px 4px; border-radius: 2px; font-size: 7px; font-style: normal; font-weight: 650; }
@@ -287,7 +288,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .modal-backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(16, 30, 39, .46); backdrop-filter: blur(2px); }
 .order-backdrop { z-index: 94; background: rgba(16, 30, 39, .28); }
 .modal-backdrop[hidden], .data-modal[hidden] { display: none; }
-.data-modal { position: fixed; z-index: 92; top: 50%; left: 50%; width: min(1140px, calc(100vw - 48px)); max-height: min(830px, calc(100vh - 48px)); transform: translate(-50%, -50%); border: 1px solid var(--line-strong); border-radius: 6px; background: #fff; box-shadow: 0 28px 80px rgba(12, 27, 37, .3); overflow: hidden; }
+.data-modal { position: fixed; z-index: 92; top: 50%; left: 50%; width: min(1360px, calc(100vw - 48px)); max-height: min(830px, calc(100vh - 48px)); transform: translate(-50%, -50%); border: 1px solid var(--line-strong); border-radius: 6px; background: #fff; box-shadow: 0 28px 80px rgba(12, 27, 37, .3); overflow: hidden; }
 .order-modal { z-index: 96; width: min(700px, calc(100vw - 48px)); }
 .modal-shell { max-height: inherit; display: flex; flex-direction: column; }
 .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 22px; padding: 20px 23px 16px; border-bottom: 1px solid var(--line); }
@@ -300,12 +301,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .participation-summary > div, .order-context > div { min-width: 0; padding: 10px 12px; background: #f8fafb; }
 .participation-summary span, .order-context span { display: block; color: var(--muted); font-size: 8px; }
 .participation-summary strong, .order-context strong { display: block; margin-top: 2px; overflow: hidden; color: var(--ink); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.participation-summary > div:last-child strong { overflow: visible; white-space: normal; overflow-wrap: anywhere; }
 .modal-note { margin: 11px 0; padding: 9px 11px; border-left: 2px solid #9db6d8; border-radius: 2px; background: var(--blue-soft); color: #52677f; font-size: 9px; line-height: 1.65; }
 .modal-note b { color: #294a70; }
 .modal-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
 .modal-table-wrap[hidden] { display: none; }
 .detail-table { width: 100%; border-collapse: collapse; font-size: 10px; }
-.participation-table { min-width: 980px; }
+.participation-table { min-width: 1240px; }
 .order-table { min-width: 520px; }
 .detail-table th { padding: 9px 10px; border-bottom: 1px solid var(--line); background: #f8fafb; color: var(--muted); font-size: 8px; font-weight: 650; text-align: left; white-space: nowrap; }
 .detail-table td { padding: 10px; border-bottom: 1px solid #edf0f2; color: var(--ink-2); vertical-align: middle; }
@@ -367,7 +369,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .drawer { width: 100%; top: 0; }
   .drawer-head, .drawer-body, .drawer-foot { padding-left: 18px; padding-right: 18px; }
   .drawer-head h2 { font-size: 22px; }
-  .quota-grid.two-col, .status-options { grid-template-columns: 1fr; }
+  .quota-grid.two-col, .quota-grid.three-col, .status-options { grid-template-columns: 1fr; }
   .drawer-foot { align-items: stretch; flex-direction: column; }
   .drawer-foot > div { display: grid; grid-template-columns: 1fr 1fr; }
   #import-drawer .drawer-foot > div { grid-template-columns: 1fr 1fr; }
@@ -382,7 +384,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .participation-summary, .order-context { grid-template-columns: 1fr; }
   .modal-foot { align-items: stretch; flex-direction: column; }
   .modal-foot > div { display: grid; grid-template-columns: 1fr 1fr; }
-  .participation-table { min-width: 860px; }
+  .participation-table { min-width: 1180px; }
   .toast-region { left: 16px; right: 16px; bottom: 16px; }
   .toast { min-width: 0; max-width: none; }
 }

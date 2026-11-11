@@ -4,14 +4,17 @@
 
   const OPERATOR = '运营管理员';
   const STATUS_LABELS = { executing: '执行中', enabled: '启用中', disabled: '已停用' };
-  const IMPORT_HEADERS = ['规则名称', '活动ID集合', '门店日总数量', '门店月总数量', '柜机日次数', '柜机月次数', 'App日次数', 'App月次数', '状态'];
+  const IMPORT_HEADERS = ['规则名称', '活动ID集合', '门店日总数量', '门店周总数量', '门店月总数量', '柜机日次数', '柜机周次数', '柜机月次数', 'App日次数', 'App周次数', 'App月次数', '状态'];
   const FIELD_DEFS = [
     { key: 'activities', label: '活动 ID 集合' },
     { key: 'dailyTotal', label: '门店日总数量' },
+    { key: 'weeklyTotal', label: '门店周总数量' },
     { key: 'monthlyTotal', label: '门店月总数量' },
     { key: 'dailyCabinet', label: '柜机日次数' },
+    { key: 'weeklyCabinet', label: '柜机周次数' },
     { key: 'monthlyCabinet', label: '柜机月次数' },
     { key: 'dailyApp', label: 'App 日次数' },
+    { key: 'weeklyApp', label: 'App 周次数' },
     { key: 'monthlyApp', label: 'App 月次数' },
     { key: 'status', label: '状态' },
     { key: 'name', label: '规则名称' }
@@ -29,23 +32,23 @@
   ];
 
   const participationOrders = [
-    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100102', entry: 'app', status: 'frozen', day: true },
-    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100103', entry: 'cabinet', status: 'participated', day: true },
-    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100104', entry: 'cabinet', status: 'participated', day: true },
-    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100105', entry: 'cabinet', status: 'frozen', day: true },
-    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611080201', entry: 'app', status: 'participated', day: false },
-    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611060118', entry: 'cabinet', status: 'participated', day: false },
-    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611030076', entry: 'app', status: 'participated', day: false },
-    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611100211', entry: 'app', status: 'frozen', day: true },
-    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611100212', entry: 'app', status: 'participated', day: true },
-    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611050188', entry: 'cabinet', status: 'participated', day: false },
-    { ruleId: 'R-001', storeId: 'ST-3103', storeName: '广州天河门店', orderId: 'SO202611090301', entry: 'cabinet', status: 'frozen', day: false },
-    { ruleId: 'R-001', storeId: 'ST-3103', storeName: '广州天河门店', orderId: 'SO202611020119', entry: 'app', status: 'participated', day: false },
-    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611100401', entry: 'cabinet', status: 'frozen', day: true },
-    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611090402', entry: 'app', status: 'participated', day: false },
-    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611080403', entry: 'cabinet', status: 'participated', day: false },
-    { ruleId: 'R-002', storeId: 'ST-3202', storeName: '成都春熙路店', orderId: 'SO202611100501', entry: 'app', status: 'participated', day: true },
-    { ruleId: 'R-002', storeId: 'ST-3202', storeName: '成都春熙路店', orderId: 'SO202611070502', entry: 'app', status: 'frozen', day: false }
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611110102', entry: 'app', status: 'frozen', day: true, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611110103', entry: 'cabinet', status: 'participated', day: true, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611110104', entry: 'cabinet', status: 'participated', day: true, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611110105', entry: 'cabinet', status: 'frozen', day: true, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611090201', entry: 'app', status: 'participated', day: false, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611060118', entry: 'cabinet', status: 'participated', day: false, week: false },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611030076', entry: 'app', status: 'participated', day: false, week: false },
+    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611110211', entry: 'app', status: 'frozen', day: true, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611110212', entry: 'app', status: 'participated', day: true, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611050188', entry: 'cabinet', status: 'participated', day: false, week: false },
+    { ruleId: 'R-001', storeId: 'ST-3103', storeName: '广州天河门店', orderId: 'SO202611090301', entry: 'cabinet', status: 'frozen', day: false, week: true },
+    { ruleId: 'R-001', storeId: 'ST-3103', storeName: '广州天河门店', orderId: 'SO202611020119', entry: 'app', status: 'participated', day: false, week: false },
+    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611110401', entry: 'cabinet', status: 'frozen', day: true, week: true },
+    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611090402', entry: 'app', status: 'participated', day: false, week: true },
+    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611080403', entry: 'cabinet', status: 'participated', day: false, week: false },
+    { ruleId: 'R-002', storeId: 'ST-3202', storeName: '成都春熙路店', orderId: 'SO202611110501', entry: 'app', status: 'participated', day: true, week: true },
+    { ruleId: 'R-002', storeId: 'ST-3202', storeName: '成都春熙路店', orderId: 'SO202611070502', entry: 'app', status: 'frozen', day: false, week: false }
   ];
 
   const seedLogs = {
@@ -54,6 +57,7 @@
         id: 'LOG-R001-002', action: '编辑规则', operator: '王运营', time: '2026-11-10 14:32', note: '双十一活动首日结束后上调门店总次数',
         changes: [
           { field: '门店日总数量', before: '40 次', after: '50 次' },
+          { field: '门店周总数量', before: '200 次', after: '250 次' },
           { field: '柜机日次数', before: '15 次', after: '20 次' }
         ]
       },
@@ -62,6 +66,7 @@
         changes: [
           { field: '活动 ID 集合', before: '—', after: 'ACT-20261101、ACT-20261103' },
           { field: '门店日总数量', before: '—', after: '40 次' },
+          { field: '门店周总数量', before: '—', after: '200 次' },
           { field: '门店月总数量', before: '—', after: '800 次' },
           { field: '状态', before: '—', after: '启用中' }
         ]
@@ -77,6 +82,7 @@
         changes: [
           { field: '活动 ID 集合', before: '—', after: 'ACT-20261105、ACT-20261108' },
           { field: '门店日总数量', before: '—', after: '30 次' },
+          { field: '门店周总数量', before: '—', after: '150 次' },
           { field: '门店月总数量', before: '—', after: '500 次' },
           { field: '柜机月次数', before: '—', after: '200 次' },
           { field: '状态', before: '—', after: '启用中' }
@@ -100,7 +106,7 @@
     ],
     'R-004': [
       {
-        id: 'LOG-R004-002', action: '开始执行', operator: '系统任务', time: '2026-11-10 15:10', note: '启用后开始回溯当前日/月历史数据，回放期间规则内活动阻断新参与。',
+        id: 'LOG-R004-002', action: '开始执行', operator: '系统任务', time: '2026-11-10 15:10', note: '启用后开始回溯当前日/周/月历史数据，回放期间规则内活动阻断新参与。',
         changes: [
           { field: '状态', before: '已停用', after: '执行中' },
           { field: '执行批次', before: '—', after: 'ACT-20261110-001' },
@@ -113,6 +119,7 @@
         changes: [
           { field: '活动 ID 集合', before: '—', after: 'ACT-20261112' },
           { field: '门店日总数量', before: '—', after: '36 次' },
+          { field: '门店周总数量', before: '—', after: '180 次' },
           { field: '门店月总数量', before: '—', after: '480 次' },
           { field: '状态', before: '—', after: '执行中' }
         ]
@@ -121,10 +128,10 @@
   };
 
   let rules = [
-    { id: 'R-001', name: '双十一换新·门店次数', status: 'enabled', activities: ['ACT-20261101', 'ACT-20261103'], dailyTotal: 50, monthlyTotal: 800, dailyCabinet: 20, monthlyCabinet: 300, dailyApp: 40, monthlyApp: 600, updated: '2026-11-10 14:32', updater: '王运营', logs: seedLogs['R-001'] },
-    { id: 'R-002', name: '月中换新·次数兜底', status: 'enabled', activities: ['ACT-20261105', 'ACT-20261108'], dailyTotal: 30, monthlyTotal: 500, dailyCabinet: 12, monthlyCabinet: null, dailyApp: 25, monthlyApp: 400, updated: '2026-11-09 18:05', updater: '陈运营', logs: seedLogs['R-002'] },
-    { id: 'R-003', name: '九月开学换新（已停用）', status: 'disabled', activities: ['ACT-20260901'], dailyTotal: 20, monthlyTotal: 260, dailyCabinet: null, monthlyCabinet: null, dailyApp: 16, monthlyApp: 180, updated: '2026-09-30 17:40', updater: '王运营', logs: seedLogs['R-003'] },
-    { id: 'R-004', name: '门店焕新·历史回放中', status: 'executing', activities: ['ACT-20261112'], dailyTotal: 36, monthlyTotal: 480, dailyCabinet: 18, monthlyCabinet: 240, dailyApp: 24, monthlyApp: 300, updated: '2026-11-10 15:10', updater: '系统任务', logs: seedLogs['R-004'], initialization: { mode: 'activation', batchId: 'ACT-20261110-001', trigger: '新建后启用', activities: ['ACT-20261112'], demo: true } }
+    { id: 'R-001', name: '双十一换新·门店次数', status: 'enabled', activities: ['ACT-20261101', 'ACT-20261103'], dailyTotal: 50, weeklyTotal: 250, monthlyTotal: 800, dailyCabinet: 20, weeklyCabinet: 90, monthlyCabinet: 300, dailyApp: 40, weeklyApp: 180, monthlyApp: 600, updated: '2026-11-10 14:32', updater: '王运营', logs: seedLogs['R-001'] },
+    { id: 'R-002', name: '月中换新·次数兜底', status: 'enabled', activities: ['ACT-20261105', 'ACT-20261108'], dailyTotal: 30, weeklyTotal: 150, monthlyTotal: 500, dailyCabinet: 12, weeklyCabinet: 50, monthlyCabinet: null, dailyApp: 25, weeklyApp: null, monthlyApp: 400, updated: '2026-11-09 18:05', updater: '陈运营', logs: seedLogs['R-002'] },
+    { id: 'R-003', name: '九月开学换新（已停用）', status: 'disabled', activities: ['ACT-20260901'], dailyTotal: 20, weeklyTotal: null, monthlyTotal: 260, dailyCabinet: null, weeklyCabinet: null, monthlyCabinet: null, dailyApp: 16, weeklyApp: null, monthlyApp: 180, updated: '2026-09-30 17:40', updater: '王运营', logs: seedLogs['R-003'] },
+    { id: 'R-004', name: '门店焕新·历史回放中', status: 'executing', activities: ['ACT-20261112'], dailyTotal: 36, weeklyTotal: 180, monthlyTotal: 480, dailyCabinet: 18, weeklyCabinet: 72, monthlyCabinet: 240, dailyApp: 24, weeklyApp: 120, monthlyApp: 300, updated: '2026-11-10 15:10', updater: '系统任务', logs: seedLogs['R-004'], initialization: { mode: 'activation', batchId: 'ACT-20261110-001', trigger: '新建后启用', activities: ['ACT-20261112'], demo: true } }
   ];
 
   let activeRuleId = null;
@@ -228,28 +235,34 @@
   const activationPeriods = () => {
     const date = new Date();
     const pad = (value) => String(value).padStart(2, '0');
-    const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const formatDate = (value) => `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+    const day = formatDate(date);
     const month = `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
-    return { day, month };
+    const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    const week = `${formatDate(monday)} ~ ${formatDate(sunday)}`;
+    return { day, week, month };
   };
 
   const makeActivationStartLog = (rule, trigger, activityIds = rule.activities, batchId = '', mode = 'activation') => {
-    const { day, month } = activationPeriods();
+    const { day, week, month } = activationPeriods();
     return makeLog('开始执行', [
       { field: '状态', before: mode === 'incremental' ? '启用中' : '已停用', after: mode === 'incremental' ? '启用中（新增活动初始化中）' : '执行中' },
       { field: '执行批次', before: '—', after: batchId || '—' },
-      { field: '初始化周期', before: '—', after: `${day}（日）、${month}（月）` },
+      { field: '初始化周期', before: '—', after: `${day}（日）、${week}（周）、${month}（月）` },
       { field: '活动范围', before: '—', after: activityIds.join('、') },
       { field: '处理结果', before: '—', after: mode === 'incremental' ? '新增活动初始化中，原活动继续执行' : '历史数据回放进行中，规则内活动阻断新参与' }
-    ], `${trigger}：回溯当前日/月历史成交并补建冻结订单；回放完成前不会切换为启用中。`, '系统任务');
+    ], `${trigger}：回溯当前日/周/月历史成交并补建冻结订单；回放完成前不会切换为启用中。`, '系统任务');
   };
 
   const makeActivationCompleteLog = (rule, trigger, activityIds = rule.activities, batchId = '', mode = 'activation') => {
-    const { day, month } = activationPeriods();
+    const { day, week, month } = activationPeriods();
     return makeLog('初始化完成', [
       { field: '状态', before: mode === 'incremental' ? '启用中（新增活动初始化中）' : '执行中', after: '启用中' },
       { field: '执行批次', before: batchId || '—', after: batchId || '—' },
-      { field: '初始化周期', before: `${day}（日）、${month}（月）`, after: `${day}（日）、${month}（月）` },
+      { field: '初始化周期', before: `${day}（日）、${week}（周）、${month}（月）`, after: `${day}（日）、${week}（周）、${month}（月）` },
       { field: '活动范围', before: activityIds.join('、'), after: activityIds.join('、') },
       { field: '处理结果', before: '历史数据回放中', after: '成功，期初用量与冻结订单已纳入当前参与数量' }
     ], `${trigger}：历史数据回放完成，规则开始执行次数校验和冻结。`, '系统任务');
@@ -292,12 +305,13 @@
   };
 
   const dailyText = (value) => value ? `${value} / 日` : '不执行';
+  const weeklyText = (value) => value ? `${value} / 周` : '不执行';
   const monthlyText = (value) => value ? `${value} / 月` : '不执行';
 
   const ordersForRule = (ruleId) => participationOrders.filter((order) => order.ruleId === ruleId);
 
   const participationCount = (orders, period, entry = 'total') => {
-    const inPeriod = orders.filter((order) => period === 'month' || order.day);
+    const inPeriod = orders.filter((order) => period === 'month' || order[period]);
     const entryOrders = entry === 'total' ? inPeriod : inPeriod.filter((order) => order.entry === entry);
     const frozen = entryOrders.filter((order) => order.status === 'frozen').length;
     const participated = entryOrders.filter((order) => order.status === 'participated').length;
@@ -347,9 +361,9 @@
         <tr data-rule-id="${rule.id}">
           <td><span class="rule-name">${escapeHtml(displayName(rule))}</span><span class="rule-code">${rule.id}</span></td>
           <td><div class="activity-tags">${tags}${more}</div></td>
-          <td class="limit-cell"><strong>${dailyText(rule.dailyTotal)}</strong><small>${monthlyText(rule.monthlyTotal)}</small></td>
-          <td class="limit-cell"><strong>${dailyText(rule.dailyCabinet)}</strong><small>${monthlyText(rule.monthlyCabinet)}</small></td>
-          <td class="limit-cell"><strong>${dailyText(rule.dailyApp)}</strong><small>${monthlyText(rule.monthlyApp)}</small></td>
+          <td class="limit-cell"><strong>${dailyText(rule.dailyTotal)}</strong><small>${weeklyText(rule.weeklyTotal)}</small><small>${monthlyText(rule.monthlyTotal)}</small></td>
+          <td class="limit-cell"><strong>${dailyText(rule.dailyCabinet)}</strong><small>${weeklyText(rule.weeklyCabinet)}</small><small>${monthlyText(rule.monthlyCabinet)}</small></td>
+          <td class="limit-cell"><strong>${dailyText(rule.dailyApp)}</strong><small>${weeklyText(rule.weeklyApp)}</small><small>${monthlyText(rule.monthlyApp)}</small></td>
           <td><div class="status-stack"><span class="status-text ${rule.status}">${statusLabel(rule.status)}</span>${statusNote}</div></td>
           <td><button class="participation-link" type="button" data-participation="${rule.id}" aria-label="查看“${escapeHtml(displayName(rule))}”的参与详情"><span>参与详情</span><small>${storeCount ? `${storeCount} 家门店` : '暂无数据'}</small></button></td>
           <td>${logCell}</td>
@@ -412,7 +426,7 @@
       input.value = '';
       input.closest('.number-wrap').classList.remove('invalid');
     });
-    $('#save-hint').textContent = '活动 ID 集合、门店日总数量、门店月总数量为必填项';
+    $('#save-hint').textContent = '活动 ID 集合、门店日总数量、门店月总数量为必填项；周次数选填';
     renderSelectedActivities();
     renderActivityOptions();
   };
@@ -424,10 +438,13 @@
     const status = $(`input[name="rule-status"][value="${rule.status}"]`);
     if (status) status.checked = true;
     form.elements.dailyTotal.value = rule.dailyTotal;
+    form.elements.weeklyTotal.value = rule.weeklyTotal ?? '';
     form.elements.monthlyTotal.value = rule.monthlyTotal;
     form.elements.dailyCabinet.value = rule.dailyCabinet ?? '';
+    form.elements.weeklyCabinet.value = rule.weeklyCabinet ?? '';
     form.elements.monthlyCabinet.value = rule.monthlyCabinet ?? '';
     form.elements.dailyApp.value = rule.dailyApp ?? '';
+    form.elements.weeklyApp.value = rule.weeklyApp ?? '';
     form.elements.monthlyApp.value = rule.monthlyApp ?? '';
     renderSelectedActivities();
     renderActivityOptions();
@@ -499,7 +516,7 @@
     renderActivityOptions();
     setError('#activity-error');
     $('.activity-picker')?.classList.remove('invalid');
-    $('#save-hint').textContent = '活动已添加，请继续填写门店日/月总数量';
+    $('#save-hint').textContent = '活动已添加，请继续填写门店日/月总数量；周次数可按需填写';
   };
 
   const collectQuotas = () => {
@@ -552,7 +569,7 @@
       setError('#limit-error', '活动 ID 集合、门店日总数量、门店月总数量为必填项。');
       valid = false;
     } else if (quotaResult.invalid) {
-      setError('#limit-error', '已填写的次数必须为大于 0 的整数；未填写的入口次数不执行。');
+      setError('#limit-error', '已填写的次数必须为大于 0 的整数；未填写的周次数或入口次数不执行。');
       valid = false;
     }
     if (!valid) {
@@ -649,7 +666,7 @@
     rule.initialization = { mode: 'activation', batchId, trigger: '停用后重新启用', activities: [...rule.activities] };
     const enableLog = makeLog('启用规则', [{
       field: '状态', before: statusLabel(before), after: '执行中'
-    }], '启用后先执行当前日/月历史数据回放，完成前不开始执行次数规则。');
+    }], '启用后先执行当前日/周/月历史数据回放，完成前不开始执行次数规则。');
     const startLog = makeActivationStartLog(rule, '停用后重新启用', rule.activities, batchId, 'activation');
     rule.logs = [startLog, enableLog, ...(rule.logs || [])];
     rule.updated = startLog.time;
@@ -706,11 +723,11 @@
 
   const renderParticipation = (rule) => {
     const stores = participationStores(rule.id);
-    const { day, month } = activationPeriods();
+    const { day, week, month } = activationPeriods();
     $('#participation-modal-subtitle').textContent = `${displayName(rule)} · ${rule.id} · 数量包含冻结中与已参与（成交）订单`;
     $('#participation-rule-name').textContent = `${displayName(rule)}（${rule.id}）`;
     $('#participation-rule-status').textContent = statusLabel(rule.status);
-    $('#participation-period').textContent = `${day}（日） / ${month}（月）`;
+    $('#participation-period').textContent = `${day}（日） / ${week}（周） / ${month}（月）`;
     $('#participation-foot-count').textContent = `共 ${stores.length} 家门店`;
 
     const hasData = stores.length > 0;
@@ -723,6 +740,9 @@
         <td>${countCell(participationCount(orders, 'day', 'cabinet'))}</td>
         <td>${countCell(participationCount(orders, 'day', 'app'))}</td>
         <td>${countCell(participationCount(orders, 'day', 'total'))}</td>
+        <td>${countCell(participationCount(orders, 'week', 'total'))}</td>
+        <td>${countCell(participationCount(orders, 'week', 'cabinet'))}</td>
+        <td>${countCell(participationCount(orders, 'week', 'app'))}</td>
         <td>${countCell(participationCount(orders, 'month', 'total'))}</td>
         <td>${countCell(participationCount(orders, 'month', 'cabinet'))}</td>
         <td>${countCell(participationCount(orders, 'month', 'app'))}</td>
@@ -733,7 +753,7 @@
     if (!hasData) {
       $('#participation-empty-copy').textContent = rule.status === 'executing'
         ? '规则仍在执行历史数据回放，尚未开始执行次数规则，因此暂无参与数据。'
-        : '当前周期内还没有冻结中或已参与订单。';
+        : '当前日、周、月周期内还没有冻结中或已参与订单。';
     }
   };
 
@@ -850,14 +870,20 @@
     const rows = [];
     const batchOwners = new Map();
     const records = [];
+    const layouts = new Set();
+    let header = null;
     source.replace(/\r\n?/g, '\n').split('\n').forEach((rawLine, index) => {
       const line = rawLine.replace(/^\uFEFF/, '').trim();
       if (!line || line.startsWith('#')) return;
       const delimiter = line.includes('\t') ? '\t' : ',';
       const cells = parseDelimitedLine(line, delimiter);
-      if (!records.length && (cells[0]?.includes('规则名称') || cells[1]?.includes('活动ID'))) return;
+      if (!records.length && (cells[0]?.includes('规则名称') || cells[1]?.includes('活动ID'))) {
+        header = cells;
+        return;
+      }
       records.push({ line: index + 1, cells });
     });
+    const legacyHeader = Boolean(header && header.length === 9 && !header.some((cell) => cell.includes('周')));
 
     if (!records.length) {
       return { rows, errors: ['未识别到有效数据行，请粘贴 CSV 或上传文件。'] };
@@ -865,14 +891,32 @@
 
     records.forEach(({ line, cells: originalCells }) => {
       const cells = [...originalCells];
-      while (cells.length > 9 && !cells[cells.length - 1]) cells.pop();
-      if (cells.length > 9) {
-        errors.add(`第 ${line} 行：字段数超过 9 列，请检查是否漏加引号。`);
+      while (cells.length > 12 && !cells[cells.length - 1]) cells.pop();
+      if (cells.length > 12) {
+        errors.add(`第 ${line} 行：字段数超过 12 列，请检查是否漏加引号。`);
         return;
       }
-      while (cells.length < 9) cells.push('');
+      if (header && !legacyHeader && cells.length < 11) {
+        errors.add(`第 ${line} 行：字段数与新版表头不一致，请保留周次数空列后重试。`);
+        return;
+      }
+      if (legacyHeader && cells.length > 9) {
+        errors.add(`第 ${line} 行：旧版 9 列模板字段数不一致，请检查是否修改了表头。`);
+        return;
+      }
+      const layout = (legacyHeader || !header) && (cells.length === 8 || cells.length === 9) ? 'legacy' : 'current';
+      layouts.add(layout);
+      let normalizedCells;
+      if (layout === 'legacy') {
+        const legacy = [...cells];
+        while (legacy.length < 9) legacy.push('');
+        normalizedCells = [legacy[0], legacy[1], legacy[2], '', legacy[3], legacy[4], '', legacy[5], legacy[6], '', legacy[7], legacy[8]];
+      } else {
+        while (cells.length < 12) cells.push('');
+        normalizedCells = cells;
+      }
 
-      const [rawName, rawActivities, rawDailyTotal, rawMonthlyTotal, rawDailyCabinet, rawMonthlyCabinet, rawDailyApp, rawMonthlyApp, rawStatus] = cells;
+      const [rawName, rawActivities, rawDailyTotal, rawWeeklyTotal, rawMonthlyTotal, rawDailyCabinet, rawWeeklyCabinet, rawMonthlyCabinet, rawDailyApp, rawWeeklyApp, rawMonthlyApp, rawStatus] = normalizedCells;
       const name = rawName.trim();
       if (name.length > 40) errors.add(`第 ${line} 行：规则名称不能超过 40 个字符。`);
 
@@ -917,10 +961,13 @@
       };
 
       const dailyTotal = readCount(rawDailyTotal, '门店日总数量', true);
+      const weeklyTotal = readCount(rawWeeklyTotal, '门店周总数量', false);
       const monthlyTotal = readCount(rawMonthlyTotal, '门店月总数量', true);
       const dailyCabinet = readCount(rawDailyCabinet, '柜机日次数', false);
+      const weeklyCabinet = readCount(rawWeeklyCabinet, '柜机周次数', false);
       const monthlyCabinet = readCount(rawMonthlyCabinet, '柜机月次数', false);
       const dailyApp = readCount(rawDailyApp, 'App 日次数', false);
+      const weeklyApp = readCount(rawWeeklyApp, 'App 周次数', false);
       const monthlyApp = readCount(rawMonthlyApp, 'App 月次数', false);
 
       let status = 'enabled';
@@ -931,8 +978,10 @@
         errors.add(`第 ${line} 行：状态“${rawStatus.trim()}”无法识别，可填写启用或停用。`);
       }
 
-      rows.push({ line, name, activities: activityIds, dailyTotal, monthlyTotal, dailyCabinet, monthlyCabinet, dailyApp, monthlyApp, status });
+      rows.push({ line, name, activities: activityIds, dailyTotal, weeklyTotal, monthlyTotal, dailyCabinet, weeklyCabinet, monthlyCabinet, dailyApp, weeklyApp, monthlyApp, status });
     });
+
+    if (layouts.size > 1) errors.add('同一批次不能混用旧版 9 列模板和新版 12 列模板，请统一列结构后重新校验。');
 
     return { rows, errors: [...errors] };
   };
@@ -977,9 +1026,9 @@
         <td class="import-row-id">${row.line}</td>
         <td>${escapeHtml(row.name || '未命名（导入时生成）')}</td>
         <td>${escapeHtml(row.activities.join(' | ') || '—')}</td>
-        <td>${row.dailyTotal ?? '缺失'} / ${row.monthlyTotal ?? '缺失'}</td>
-        <td>${row.dailyCabinet ?? '—'} / ${row.monthlyCabinet ?? '—'}</td>
-        <td>${row.dailyApp ?? '—'} / ${row.monthlyApp ?? '—'}</td>
+        <td>${row.dailyTotal ?? '缺失'} / ${row.weeklyTotal ?? '—'} / ${row.monthlyTotal ?? '缺失'}</td>
+        <td>${row.dailyCabinet ?? '—'} / ${row.weeklyCabinet ?? '—'} / ${row.monthlyCabinet ?? '—'}</td>
+        <td>${row.dailyApp ?? '—'} / ${row.weeklyApp ?? '—'} / ${row.monthlyApp ?? '—'}</td>
         <td>${row.status === 'enabled' ? '启用（执行中）' : '停用'}</td>
       </tr>`).join('');
     importMore.hidden = result.rows.length <= 20;
@@ -1037,10 +1086,13 @@
         status: shouldActivate ? 'executing' : 'disabled',
         activities: [...row.activities],
         dailyTotal: row.dailyTotal,
+        weeklyTotal: row.weeklyTotal,
         monthlyTotal: row.monthlyTotal,
         dailyCabinet: row.dailyCabinet,
+        weeklyCabinet: row.weeklyCabinet,
         monthlyCabinet: row.monthlyCabinet,
         dailyApp: row.dailyApp,
+        weeklyApp: row.weeklyApp,
         monthlyApp: row.monthlyApp,
         updated: '',
         updater: OPERATOR,
@@ -1073,8 +1125,8 @@
   const downloadTemplate = () => {
     const available = activities.filter((activity) => !ownerOfActivity(activity.id)).slice(0, 2);
     const rows = [IMPORT_HEADERS.join(',')];
-    if (available[0]) rows.push(`导入示例规则 A,${available[0].id},20,200,8,,12,,启用`);
-    if (available[1]) rows.push(`导入示例规则 B,${available[1].id},10,100,,,6,60,停用`);
+    if (available[0]) rows.push(['导入示例规则 A', available[0].id, 20, 80, 200, 8, 20, '', 12, 40, '', '启用'].join(','));
+    if (available[1]) rows.push(['导入示例规则 B', available[1].id, 10, 40, 100, 6, 20, 60, '', '', '', '停用'].join(','));
     const blob = new Blob([`\uFEFF${rows.join('\n')}`], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -1092,8 +1144,8 @@
       return;
     }
     const rows = [IMPORT_HEADERS.join(',')];
-    rows.push(`导入示例规则 A,${available[0].id},20,200,8,,12,,启用`);
-    if (available[1]) rows.push(`导入示例规则 B,${available[1].id},10,100,,,6,60,停用`);
+    rows.push(['导入示例规则 A', available[0].id, 20, 80, 200, 8, 20, '', 12, 40, '', '启用'].join(','));
+    if (available[1]) rows.push(['导入示例规则 B', available[1].id, 10, 40, 100, 6, 20, 60, '', '', '', '停用'].join(','));
     importText.value = rows.join('\n');
     invalidateImportPreview();
     previewImport();

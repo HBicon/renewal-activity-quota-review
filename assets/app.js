@@ -170,6 +170,10 @@
         block.setAttribute('role', 'region');
         block.setAttribute('aria-label', `代码示例 ${index + 1}，可横向滚动`);
       });
+      $$('table', content).forEach((table, index) => {
+        table.tabIndex = 0;
+        table.setAttribute('aria-label', `数据表格 ${index + 1}`);
+      });
       buildToc(content);
     } catch (error) {
       content.innerHTML = '<p>PRD 正文加载失败，请使用页面上方“Markdown 原文”入口阅读。</p>';
