@@ -349,10 +349,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .modal-empty[hidden] { display: none; }
 .modal-empty strong { display: block; font-size: 12px; }
 .modal-empty p { margin: 4px 0 0; color: var(--muted); font-size: 9px; }
+.error-backdrop { z-index: 110; background: rgba(16, 30, 39, .54); }
+.error-modal { z-index: 112; width: min(520px, calc(100vw - 32px)); }
+.error-body { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 16px; align-items: start; padding: 27px 27px 24px; }
+.error-mark { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid #edcccc; border-radius: 50%; background: var(--red-soft); color: var(--red); font-size: 22px; font-weight: 800; line-height: 1; }
+.error-copy h2 { margin: 4px 0 7px; color: var(--ink); font-size: 22px; line-height: 1.3; letter-spacing: -.02em; }
+.error-copy p { margin: 0; color: var(--ink-2); font-size: 11px; line-height: 1.7; white-space: pre-line; }
+.error-copy .error-hint { margin-top: 8px; padding: 8px 10px; border-left: 2px solid #d8b6b6; border-radius: 2px; background: #fdf7f7; color: #765252; font-size: 9px; line-height: 1.65; }
+.error-hint[hidden] { display: none; }
+.error-foot { justify-content: flex-end; }
 
 .toast-region { position: fixed; z-index: 100; right: 22px; bottom: 22px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
 .toast { min-width: 260px; max-width: 390px; padding: 11px 14px; border: 1px solid var(--line); border-left: 3px solid var(--green); border-radius: 4px; background: #fff; box-shadow: 0 10px 32px rgba(20, 38, 48, .14); color: var(--ink-2); font-size: 10px; line-height: 1.55; animation: toast-in .18s ease-out; }
-.toast.error { border-left-color: var(--red); }
 @keyframes toast-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 1020px) {
@@ -401,6 +409,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .log-entry-head time { width: 100%; margin-left: 0; }
   .log-change-row { grid-template-columns: 76px minmax(0, 1fr); }
   .data-modal, .order-modal { width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
+  .error-modal { width: calc(100vw - 24px); }
+  .error-body { grid-template-columns: 1fr; padding: 22px 18px 19px; }
+  .error-foot { align-items: stretch; }
+  .error-foot .button { width: 100%; }
   .modal-head, .modal-body, .modal-foot { padding-left: 16px; padding-right: 16px; }
   .modal-head h2 { font-size: 20px; }
   .participation-summary, .order-context { grid-template-columns: 1fr; }

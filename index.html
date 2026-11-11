@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制 PRD 评审站：日、周、月三周期次数按需配置，柜机/App 入口独立执行，并在活动选择页前置拦截；覆盖 App 专属提示、冻结与已参与计数、执行中初始化、参与详情和订单明细。">
+  <meta name="description" content="门店换新活动参与次数限制 PRD 评审站：日、周、月三周期次数按需配置，柜机/App 入口独立执行，并在活动选择页前置拦截；覆盖 App 专属提示、统一报错弹窗、冻结与已参与计数、执行中初始化、参与详情和订单明细。">
   <title>门店换新活动参与次数限制｜PRD 评审站</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="assets/styles.css?v=20261111-7">
   <script src="assets/marked.min.js?v=20261110-2" defer></script>
-  <script src="assets/app.js?v=20261111-12" defer></script>
+  <script src="assets/app.js?v=20261111-13" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -36,7 +36,7 @@
   <main id="main-content">
     <section class="hero" id="overview" aria-labelledby="page-title">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v1.2</div>
+        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v1.3</div>
         <h1 id="page-title">门店换新活动参与次数限制</h1>
         <p class="hero-lead">规则不绑定门店，通过活动 ID 集合匹配活动；运行时按门店独立计数。总次数与柜机/App 次数均按周期选配，并在活动选择页前置拦截；提交订单时继续原子冻结。参与数量统一按“冻结中 + 已参与”计算。</p>
         <div class="hero-meta" aria-label="文档信息">
@@ -260,6 +260,7 @@
             <li><span>10</span>门店端不展示冻结中、已参与或剩余次数</li>
             <li><span>11</span>在活动选择页选择活动时校验；App 次数耗尽提示“APP端办单限量开启，请移步柜机端办理。”</li>
             <li><span>12</span>柜机继续提示“活动数量已用完，请选择其他活动参与”，提交订单仍执行原子冻结</li>
+            <li><span>13</span>配置端阻断型报错统一使用阻塞式弹窗，不使用吐司提示；失败后保留已填内容并定位问题字段</li>
           </ol>
         </aside>
       </div>
@@ -321,6 +322,7 @@
             <tr><td>次数耗尽提示</td><td>App 使用“APP端办单限量开启，请移步柜机端办理。”；柜机继续使用通用文案</td><td>前端不暴露具体命中维度，柜机独立校验</td><td>业务 + 产品</td></tr>
             <tr><td>前端拦截时点</td><td>用户在活动选择页选择活动并点击“参与活动”时校验；提交订单仍执行原子冻结</td><td>前置校验不占次数，二次硬校验防并发穿透</td><td>产品 + 技术</td></tr>
             <tr><td>门店总量与分入口次数</td><td>门店日/周/月总量均可留空；未配置的周期按柜机/App 次数独立执行</td><td>9 项次数至少配置 1 项，门店合计继续展示</td><td>业务 + 产品</td></tr>
+            <tr><td>配置端错误反馈</td><td>保存失败、活动冲突、启停阻断、导入失败、文件读取或服务异常均使用阻塞式弹窗；错误不使用吐司</td><td>弹窗不自动消失，保留输入内容并明确下一步；成功类结果可继续使用轻提示</td><td>产品 + 设计 + 前端</td></tr>
           </tbody>
         </table>
       </div>
@@ -350,7 +352,7 @@
   </main>
 
   <footer class="footer">
-    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v1.2 · 草案</span></div>
+    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v1.3 · 草案</span></div>
     <p>本页为静态评审站，不连接真实活动、订单或退款系统；示例数据仅用于规则说明。<a href="review-record.md">评审与发布记录</a></p>
   </footer>
 

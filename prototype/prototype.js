@@ -144,6 +144,7 @@
   let activationSequence = 1;
   let participationReturnFocus = null;
   let orderReturnFocus = null;
+  let errorReturnFocus = null;
   let currentParticipationRuleId = null;
 
   const form = $('#rule-form');
@@ -173,6 +174,8 @@
   const orderBackdrop = $('#order-backdrop');
   const orderTableWrap = $('#order-table-wrap');
   const orderEmpty = $('#order-empty');
+  const errorModal = $('#error-modal');
+  const errorBackdrop = $('#error-backdrop');
 
   const activityById = (id) => activities.find((activity) => activity.id === id);
   const displayName = (rule) => rule.name?.trim() || `未命名次数规则 ${rule.id}`;
@@ -193,13 +196,38 @@
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 
-  const toast = (message, type = 'success') => {
+  const toast = (message) => {
     const region = $('#toast-region');
     const node = document.createElement('div');
-    node.className = `toast ${type}`;
+    node.className = 'toast';
     node.textContent = message;
     region.appendChild(node);
     window.setTimeout(() => node.remove(), 3600);
+  };
+
+  const showErrorDialog = (title, message, hint = '') => {
+    if (errorModal.hidden) {
+      errorReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    $('#error-modal-title').textContent = title;
+    $('#error-modal-message').textContent = message;
+    const hintNode = $('#error-modal-hint');
+    hintNode.textContent = hint;
+    hintNode.hidden = !hint;
+    errorModal.setAttribute('aria-describedby', hint ? 'error-modal-message error-modal-hint' : 'error-modal-message');
+    errorBackdrop.hidden = false;
+    errorModal.hidden = false;
+    syncBodyOverflow();
+    window.requestAnimationFrame(() => $('#error-modal-confirm').focus());
+  };
+
+  const closeErrorDialog = () => {
+    errorModal.hidden = true;
+    errorBackdrop.hidden = true;
+    syncBodyOverflow();
+    const returnFocus = errorReturnFocus;
+    errorReturnFocus = null;
+    if (returnFocus?.isConnected) window.requestAnimationFrame(() => returnFocus.focus());
   };
 
   const nowText = () => {
@@ -392,7 +420,7 @@
   };
 
   const syncBodyOverflow = () => {
-    const hasOpenDialog = [drawer, importDrawer, logDrawer, participationModal, orderModal].some((node) => node && !node.hidden);
+    const hasOpenDialog = [drawer, importDrawer, logDrawer, participationModal, orderModal, errorModal].some((node) => node && !node.hidden);
     document.body.style.overflow = hasOpenDialog ? 'hidden' : '';
   };
 
@@ -469,11 +497,11 @@
 
   const openDrawer = (rule = null) => {
     if (rule?.status === 'executing') {
-      toast('规则正在执行历史数据回放，完成前不可编辑或重复启停。', 'error');
+      showErrorDialog('规则正在执行中', '历史数据回放完成前，不能编辑规则或重复启停。', '请等待状态变为“启用中”后再操作。');
       return;
     }
     if (rule?.initialization?.mode === 'incremental') {
-      toast('新增活动正在初始化，完成前不可修改规则。', 'error');
+      showErrorDialog('新增活动初始化中', '新增活动的初始化尚未完成，当前不能修改规则。', '请等待初始化完成后再编辑。');
       return;
     }
     closeParticipation(false);
@@ -556,11 +584,13 @@
 
   const validateForm = () => {
     let valid = true;
+    const errors = [];
     setError('#activity-error');
     $('.activity-picker')?.classList.remove('invalid');
     if (!formActivities.length) {
       setError('#activity-error', '至少配置 1 个活动 ID。');
       $('.activity-picker')?.classList.add('invalid');
+      errors.push('活动 ID 集合不能为空，至少添加 1 个活动。');
       valid = false;
     }
     const requestedStatus = currentFormStatus();
@@ -569,6 +599,7 @@
       const owner = ownerOfActivity(duplicate, activeRuleId);
       setError('#activity-error', `活动 ${duplicate} 已被启用中/执行中规则“${displayName(owner)}”占用，停用配置不受此限制。`);
       $('.activity-picker')?.classList.add('invalid');
+      errors.push(`活动 ${duplicate} 已被“${displayName(owner)}”占用，当前配置不能以启用状态保存。`);
       valid = false;
     }
     const quotaResult = collectQuotas();
@@ -576,14 +607,16 @@
     if (!quotaResult.invalid && quotaResult.filled === 0) {
       setError('#limit-error', '门店总次数及柜机/App次数共 9 项均为选填，但至少填写 1 项。');
       $$('.quota-field .number-wrap').forEach((wrap) => wrap.classList.add('invalid'));
+      errors.push('门店总量与柜机/App 次数共 9 项至少填写 1 项，不能全部留空。');
       valid = false;
     } else if (quotaResult.invalid) {
       setError('#limit-error', '已填写的次数必须为大于 0 的整数；留空的次数不执行对应周期限制。');
+      errors.push('已填写的次数必须为大于 0 的整数，请修正标红输入框。');
       valid = false;
     }
     if (!valid) {
       $('#save-hint').textContent = '请修正标红项后再保存';
-      toast('配置未保存，请检查次数配置与活动占用冲突。', 'error');
+      showErrorDialog('配置未保存', errors.join('\n'), '修改内容已保留，请按表单标红提示调整后重新保存。');
     }
     return valid;
   };
@@ -653,7 +686,7 @@
     const rule = rules.find((item) => item.id === id);
     if (!rule) return;
     if (rule.status === 'executing' || rule.initialization) {
-      toast('规则正在处理初始化任务，完成前不可重复启停。', 'error');
+      showErrorDialog('规则正在初始化', '当前规则正在处理初始化任务，完成前不可重复启停。', '请稍后重试。');
       return;
     }
     const before = rule.status;
@@ -674,7 +707,7 @@
       .map((activityId) => ({ activityId, owner: ownerOfActivity(activityId, rule.id) }))
       .find(({ owner }) => Boolean(owner));
     if (conflict) {
-      toast(`活动 ${conflict.activityId} 已被启用中/执行中规则“${displayName(conflict.owner)}”占用，暂不能启用。`, 'error');
+      showErrorDialog('活动已被占用', `活动 ${conflict.activityId} 已被启用中/执行中规则“${displayName(conflict.owner)}”占用，暂不能启用。`, '请先停用占用规则，或移除冲突活动后再试。');
       return;
     }
 
@@ -1062,6 +1095,11 @@
   const previewImport = () => {
     const result = parseImportRows(importText.value);
     renderImportPreview(result);
+    if (result.errors.length) {
+      showErrorDialog('导入校验未通过', `发现 ${result.errors.length} 个校验问题，本批次不会写入任何规则。`, '详细行号和原因已列在导入抽屉，修正后请重新校验。');
+    } else if (!result.rows.length) {
+      showErrorDialog('导入校验未通过', '未解析到可导入的数据。', '请粘贴 CSV 内容或选择文件后重新校验。');
+    }
   };
 
   const resetImportForm = () => {
@@ -1093,7 +1131,11 @@
     const result = parseImportRows(importText.value);
     if (result.errors.length || !result.rows.length) {
       renderImportPreview(result);
-      toast('批量导入未执行，请先修正校验问题。', 'error');
+      showErrorDialog(
+        '导入未执行',
+        result.errors.length ? `发现 ${result.errors.length} 个校验问题，本批次不会写入任何规则。` : '未解析到可导入的数据。',
+        '详细行号和原因已列在导入抽屉，修正后请重新校验。'
+      );
       return;
     }
     const batchId = nextBatchId();
@@ -1163,7 +1205,7 @@
   const fillImportSample = () => {
     const available = activities.filter((activity) => !ownerOfActivity(activity.id)).slice(0, 2);
     if (!available.length) {
-      toast('当前已无未占用活动，无法填入可用示例。', 'error');
+      showErrorDialog('无法填入示例', '当前已无未占用活动，无法生成可用的导入示例。', '请先停用或调整已占用活动，或手动填写 CSV 内容。');
       return;
     }
     const rows = [IMPORT_HEADERS.join(',')];
@@ -1192,9 +1234,16 @@
   $('#close-order-footer')?.addEventListener('click', () => closeOrderDetails());
   $('#back-to-participation')?.addEventListener('click', () => closeOrderDetails());
   orderBackdrop?.addEventListener('click', () => closeOrderDetails());
+  $('#error-modal-confirm')?.addEventListener('click', closeErrorDialog);
+  errorModal?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Tab') return;
+    event.preventDefault();
+    $('#error-modal-confirm').focus();
+  });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    if (!orderModal.hidden) closeOrderDetails();
+    if (!errorModal.hidden) closeErrorDialog();
+    else if (!orderModal.hidden) closeOrderDetails();
     else if (!participationModal.hidden) closeParticipation();
     else if (!logDrawer.hidden) closeLogDrawer();
     else if (!importDrawer.hidden) closeImportDrawer(true);
@@ -1277,7 +1326,7 @@
       invalidateImportPreview();
       previewImport();
     }).catch(() => {
-      toast('文件读取失败，请重新选择 CSV 文件。', 'error');
+      showErrorDialog('文件读取失败', '无法读取所选 CSV 文件。', '请检查文件后重新选择，或直接粘贴 CSV 内容。');
     });
   });
 
