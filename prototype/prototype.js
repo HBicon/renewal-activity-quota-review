@@ -4,6 +4,7 @@
 
   const OPERATOR = '运营管理员';
   const STATUS_LABELS = { executing: '执行中', enabled: '启用中', disabled: '已停用' };
+  const ACTIVE_RULE_STATUSES = new Set(['enabled', 'executing']);
   const IMPORT_HEADERS = ['规则名称', '活动ID集合', '门店日总数量', '门店周总数量', '门店月总数量', '柜机日次数', '柜机周次数', '柜机月次数', 'App日次数', 'App周次数', 'App月次数', '状态'];
   const FIELD_DEFS = [
     { key: 'activities', label: '活动 ID 集合' },
@@ -130,7 +131,7 @@
   let rules = [
     { id: 'R-001', name: '双十一换新·门店次数', status: 'enabled', activities: ['ACT-20261101', 'ACT-20261103'], dailyTotal: 50, weeklyTotal: 250, monthlyTotal: 800, dailyCabinet: 20, weeklyCabinet: 90, monthlyCabinet: 300, dailyApp: 40, weeklyApp: 180, monthlyApp: 600, updated: '2026-11-10 14:32', updater: '王运营', logs: seedLogs['R-001'] },
     { id: 'R-002', name: '月中换新·次数兜底', status: 'enabled', activities: ['ACT-20261105', 'ACT-20261108'], dailyTotal: 30, weeklyTotal: 150, monthlyTotal: 500, dailyCabinet: 12, weeklyCabinet: 50, monthlyCabinet: null, dailyApp: 25, weeklyApp: null, monthlyApp: 400, updated: '2026-11-09 18:05', updater: '陈运营', logs: seedLogs['R-002'] },
-    { id: 'R-003', name: '九月开学换新（已停用）', status: 'disabled', activities: ['ACT-20260901'], dailyTotal: 20, weeklyTotal: null, monthlyTotal: 260, dailyCabinet: null, weeklyCabinet: null, monthlyCabinet: null, dailyApp: 16, weeklyApp: null, monthlyApp: 180, updated: '2026-09-30 17:40', updater: '王运营', logs: seedLogs['R-003'] },
+    { id: 'R-003', name: '九月开学换新（已停用）', status: 'disabled', activities: ['ACT-20260901'], dailyTotal: 20, weeklyTotal: 120, monthlyTotal: 260, dailyCabinet: null, weeklyCabinet: null, monthlyCabinet: null, dailyApp: 16, weeklyApp: null, monthlyApp: 180, updated: '2026-09-30 17:40', updater: '王运营', logs: seedLogs['R-003'] },
     { id: 'R-004', name: '门店焕新·历史回放中', status: 'executing', activities: ['ACT-20261112'], dailyTotal: 36, weeklyTotal: 180, monthlyTotal: 480, dailyCabinet: 18, weeklyCabinet: 72, monthlyCabinet: 240, dailyApp: 24, weeklyApp: 120, monthlyApp: 300, updated: '2026-11-10 15:10', updater: '系统任务', logs: seedLogs['R-004'], initialization: { mode: 'activation', batchId: 'ACT-20261110-001', trigger: '新建后启用', activities: ['ACT-20261112'], demo: true } }
   ];
 
@@ -175,11 +176,13 @@
   const activityById = (id) => activities.find((activity) => activity.id === id);
   const displayName = (rule) => rule.name?.trim() || `未命名次数规则 ${rule.id}`;
   const statusLabel = (status) => STATUS_LABELS[status] || STATUS_LABELS.enabled;
-  const ownerOfActivity = (activityId, excludeRuleId = null) => rules.find((rule) => rule.id !== excludeRuleId && rule.activities.includes(activityId));
+  const isActiveRule = (rule) => ACTIVE_RULE_STATUSES.has(rule.status);
+  const currentFormStatus = () => $('input[name="rule-status"]:checked')?.value || 'enabled';
+  const ownerOfActivity = (activityId, excludeRuleId = null) => rules.find((rule) => rule.id !== excludeRuleId && isActiveRule(rule) && rule.activities.includes(activityId));
 
   const formatActivity = (id) => {
     const activity = activityById(id);
-    return activity ? activity.name : '活动已失效';
+    return activity ? activity.name : id;
   };
 
   const escapeHtml = (value) => String(value)
@@ -357,7 +360,7 @@
       const latestLog = rule.logs?.[0];
       const logCount = rule.logs?.length || 0;
       const logCell = latestLog ? `
-        <button class="log-summary" type="button" data-log="${rule.id}" aria-label="查看“${escapeHtml(displayName(rule))}”的操作日志">
+        <button class="log-summary" type="button" data-log="${rule.id}">
           <span class="log-summary-head"><strong>${escapeHtml(latestLog.action)}</strong><time>${escapeHtml(latestLog.time)}</time></span>
           <span class="log-summary-change">${escapeHtml(summarizeLog(latestLog))}</span>
           <span class="log-summary-link">查看全部 ${logCount} 条</span>
@@ -370,7 +373,7 @@
           <td class="limit-cell"><strong>${dailyText(rule.dailyCabinet)}</strong><small>${weeklyText(rule.weeklyCabinet)}</small><small>${monthlyText(rule.monthlyCabinet)}</small></td>
           <td class="limit-cell"><strong>${dailyText(rule.dailyApp)}</strong><small>${weeklyText(rule.weeklyApp)}</small><small>${monthlyText(rule.monthlyApp)}</small></td>
           <td><div class="status-stack"><span class="status-text ${rule.status}">${statusLabel(rule.status)}</span>${statusNote}</div></td>
-          <td><button class="participation-link" type="button" data-participation="${rule.id}" aria-label="查看“${escapeHtml(displayName(rule))}”的参与详情"><span>参与详情</span><small>${storeCount ? `${storeCount} 家门店` : '暂无数据'}</small></button></td>
+          <td><button class="participation-link" type="button" data-participation="${rule.id}"><span>参与详情</span><small>${storeCount ? `${storeCount} 家门店` : '暂无数据'}</small></button></td>
           <td>${logCell}</td>
           <td class="actions-col">${actionsLocked ? `<span class="action-note">${rule.status === 'executing' ? '历史数据处理中' : '新增活动初始化中'}</span>` : `<div class="row-actions"><button class="link-button" type="button" data-edit="${rule.id}">编辑</button><button class="link-button ${nextStatus === 'disabled' ? 'danger' : ''}" type="button" data-toggle="${rule.id}">${nextStatus === 'disabled' ? '停用' : '启用'}</button></div>`}</td>
         </tr>`;
@@ -414,8 +417,9 @@
     box.innerHTML = options.map((activity) => {
       const selected = formActivities.includes(activity.id);
       const owner = ownerOfActivity(activity.id, activeRuleId);
-      const disabled = selected || Boolean(owner);
-      const state = selected ? '已添加' : owner ? `已被“${displayName(owner)}”占用` : '可添加';
+      const occupied = Boolean(owner) && currentFormStatus() === 'enabled';
+      const disabled = selected || occupied;
+      const state = selected ? '已添加' : occupied ? `已被“${displayName(owner)}”占用` : owner ? '停用配置可添加' : '可添加';
       return `<button class="activity-option" type="button" role="option" data-activity-option="${activity.id}" ${disabled ? 'disabled' : ''}><code>${activity.id}</code><span class="option-name">${escapeHtml(activity.name)} · ${activity.period}</span><span class="option-state ${owner ? 'occupied' : ''}">${escapeHtml(state)}</span></button>`;
     }).join('');
   };
@@ -431,7 +435,7 @@
       input.value = '';
       input.closest('.number-wrap').classList.remove('invalid');
     });
-    $('#save-hint').textContent = '活动 ID 集合、门店日总数量、门店月总数量为必填项；周次数选填';
+    $('#save-hint').textContent = '活动 ID 集合及门店日、周、月总数量均为必填项';
     renderSelectedActivities();
     renderActivityOptions();
   };
@@ -480,7 +484,7 @@
     if (rule) {
       fillForm(rule);
       $('#drawer-title').textContent = '编辑限制规则';
-      $('#drawer-subtitle').textContent = `正在编辑 ${rule.id}，活动占用校验会排除当前规则。`;
+      $('#drawer-subtitle').textContent = `正在编辑 ${rule.id}，活动占用仅校验其他启用中/执行中规则。`;
     } else {
       $('#drawer-title').textContent = '新建限制规则';
       $('#drawer-subtitle').textContent = '配置活动集合与门店次数。';
@@ -509,9 +513,9 @@
       setError('#activity-error', `活动 ${normalized} 已添加到当前规则，请勿重复添加。`);
       return;
     }
-    const owner = ownerOfActivity(normalized, activeRuleId);
+    const owner = currentFormStatus() === 'enabled' ? ownerOfActivity(normalized, activeRuleId) : null;
     if (owner) {
-      setError('#activity-error', `活动 ${normalized} 已配置在“${displayName(owner)}”中，同一活动不能重复配置。`);
+      setError('#activity-error', `活动 ${normalized} 已被启用中/执行中规则“${displayName(owner)}”占用。`);
       $('.activity-picker')?.classList.add('invalid');
       return;
     }
@@ -521,7 +525,7 @@
     renderActivityOptions();
     setError('#activity-error');
     $('.activity-picker')?.classList.remove('invalid');
-    $('#save-hint').textContent = '活动已添加，请继续填写门店日/月总数量；周次数可按需填写';
+    $('#save-hint').textContent = '活动已添加，请继续填写门店日、周、月总数量';
   };
 
   const collectQuotas = () => {
@@ -561,20 +565,21 @@
       $('.activity-picker')?.classList.add('invalid');
       valid = false;
     }
-    const duplicate = formActivities.find((id) => ownerOfActivity(id, activeRuleId));
+    const requestedStatus = currentFormStatus();
+    const duplicate = requestedStatus === 'enabled' ? formActivities.find((id) => ownerOfActivity(id, activeRuleId)) : null;
     if (duplicate) {
       const owner = ownerOfActivity(duplicate, activeRuleId);
-      setError('#activity-error', `活动 ${duplicate} 已配置在“${displayName(owner)}”中，同一活动不能重复配置。`);
+      setError('#activity-error', `活动 ${duplicate} 已被启用中/执行中规则“${displayName(owner)}”占用，停用配置不受此限制。`);
       $('.activity-picker')?.classList.add('invalid');
       valid = false;
     }
     const quotaResult = collectQuotas();
     setError('#limit-error');
     if (quotaResult.missingRequired) {
-      setError('#limit-error', '活动 ID 集合、门店日总数量、门店月总数量为必填项。');
+      setError('#limit-error', '活动 ID 集合及门店日、周、月总数量均为必填项。');
       valid = false;
     } else if (quotaResult.invalid) {
-      setError('#limit-error', '已填写的次数必须为大于 0 的整数；未填写的周次数或入口次数不执行。');
+      setError('#limit-error', '已填写的次数必须为大于 0 的整数；未填写的分归宿次数不执行。');
       valid = false;
     }
     if (!valid) {
@@ -657,12 +662,20 @@
       rule.status = 'disabled';
       const log = makeLog('停用规则', [{
         field: '状态', before: statusLabel(before), after: statusLabel(rule.status)
-      }], '启停只影响后续新订单，历史参与数量和活动占用关系保持不变。');
+      }], '停用后立即释放活动占用，其他规则可重新配置这些活动；历史参与数量保留。');
       rule.logs = [log, ...(rule.logs || [])];
       rule.updated = log.time;
       rule.updater = OPERATOR;
       renderRules();
       toast(`“${displayName(rule)}”已停用，变更已写入操作日志。`);
+      return;
+    }
+
+    const conflict = rule.activities
+      .map((activityId) => ({ activityId, owner: ownerOfActivity(activityId, rule.id) }))
+      .find(({ owner }) => Boolean(owner));
+    if (conflict) {
+      toast(`活动 ${conflict.activityId} 已被启用中/执行中规则“${displayName(conflict.owner)}”占用，暂不能启用。`, 'error');
       return;
     }
 
@@ -927,6 +940,14 @@
       const name = rawName.trim();
       if (name.length > 40) errors.add(`第 ${line} 行：规则名称不能超过 40 个字符。`);
 
+      let status = 'enabled';
+      const normalizedStatus = rawStatus.trim().toLowerCase();
+      if (normalizedStatus && ['停用', '已停用', 'disabled', '否'].includes(normalizedStatus)) {
+        status = 'disabled';
+      } else if (normalizedStatus && !['启用', '启用中', 'enabled', '是'].includes(normalizedStatus)) {
+        errors.add(`第 ${line} 行：状态“${rawStatus.trim()}”无法识别，可填写启用或停用。`);
+      }
+
       const activityIds = rawActivities.split(/[|｜、;；]/).map((id) => id.trim().toUpperCase()).filter(Boolean);
       if (!activityIds.length) errors.add(`第 ${line} 行：活动 ID 集合不能为空。`);
       const seenInRow = new Set();
@@ -940,17 +961,19 @@
           errors.add(`第 ${line} 行：活动 ID ${activityId} 不存在或不是换新活动。`);
           return;
         }
-        const owner = ownerOfActivity(activityId);
+        const owner = status === 'enabled' ? ownerOfActivity(activityId) : null;
         if (owner) {
-          errors.add(`第 ${line} 行：活动 ID ${activityId} 已归属 ${owner.id}“${displayName(owner)}”，不能重复配置。`);
+          errors.add(`第 ${line} 行：活动 ID ${activityId} 已被启用中/执行中规则 ${owner.id}“${displayName(owner)}”占用。`);
           return;
         }
-        const batchOwner = batchOwners.get(activityId);
-        if (batchOwner) {
-          errors.add(`第 ${line} 行：活动 ID ${activityId} 已在第 ${batchOwner} 行使用，同一活动不能重复配置。`);
-          return;
+        if (status === 'enabled') {
+          const batchOwner = batchOwners.get(activityId);
+          if (batchOwner) {
+            errors.add(`第 ${line} 行：活动 ID ${activityId} 已在第 ${batchOwner} 行的启用配置中使用，活跃规则不能重复占用。`);
+            return;
+          }
+          batchOwners.set(activityId, line);
         }
-        batchOwners.set(activityId, line);
       });
 
       const readCount = (rawValue, label, required) => {
@@ -968,7 +991,8 @@
       };
 
       const dailyTotal = readCount(rawDailyTotal, '门店日总数量', true);
-      const weeklyTotal = readCount(rawWeeklyTotal, '门店周总数量', false);
+      const weeklyTotal = readCount(rawWeeklyTotal, '门店周总数量', layout !== 'legacy');
+      if (layout === 'legacy') errors.add(`第 ${line} 行：旧版 9 列模板缺少门店周总数量，周总数量已改为必填，请使用新版 12 列模板。`);
       const monthlyTotal = readCount(rawMonthlyTotal, '门店月总数量', true);
       const dailyCabinet = readCount(rawDailyCabinet, '柜机日次数', false);
       const weeklyCabinet = readCount(rawWeeklyCabinet, '柜机周次数', false);
@@ -976,14 +1000,6 @@
       const dailyApp = readCount(rawDailyApp, 'App 日次数', false);
       const weeklyApp = readCount(rawWeeklyApp, 'App 周次数', false);
       const monthlyApp = readCount(rawMonthlyApp, 'App 月次数', false);
-
-      let status = 'enabled';
-      const normalizedStatus = rawStatus.trim().toLowerCase();
-      if (normalizedStatus && ['停用', '已停用', 'disabled', '否'].includes(normalizedStatus)) {
-        status = 'disabled';
-      } else if (normalizedStatus && !['启用', '启用中', 'enabled', '是'].includes(normalizedStatus)) {
-        errors.add(`第 ${line} 行：状态“${rawStatus.trim()}”无法识别，可填写启用或停用。`);
-      }
 
       rows.push({ line, name, activities: activityIds, dailyTotal, weeklyTotal, monthlyTotal, dailyCabinet, weeklyCabinet, monthlyCabinet, dailyApp, weeklyApp, monthlyApp, status });
     });
@@ -1033,7 +1049,7 @@
         <td class="import-row-id">${row.line}</td>
         <td>${escapeHtml(row.name || '未命名（导入时生成）')}</td>
         <td>${escapeHtml(row.activities.join(' | ') || '—')}</td>
-        <td>${row.dailyTotal ?? '缺失'} / ${row.weeklyTotal ?? '—'} / ${row.monthlyTotal ?? '缺失'}</td>
+        <td>${row.dailyTotal ?? '缺失'} / ${row.weeklyTotal ?? '缺失'} / ${row.monthlyTotal ?? '缺失'}</td>
         <td>${row.dailyCabinet ?? '—'} / ${row.weeklyCabinet ?? '—'} / ${row.monthlyCabinet ?? '—'}</td>
         <td>${row.dailyApp ?? '—'} / ${row.weeklyApp ?? '—'} / ${row.monthlyApp ?? '—'}</td>
         <td>${row.status === 'enabled' ? '启用（执行中）' : '停用'}</td>
@@ -1233,6 +1249,13 @@
     renderSelectedActivities();
     renderActivityOptions();
     setError('#activity-error');
+  });
+  $$('input[name="rule-status"]').forEach((input) => {
+    input.addEventListener('change', () => {
+      setError('#activity-error');
+      $('.activity-picker')?.classList.remove('invalid');
+      renderActivityOptions();
+    });
   });
   $$('.quota-field input[type="number"]').forEach((input) => {
     input.addEventListener('input', () => {
