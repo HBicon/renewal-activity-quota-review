@@ -177,6 +177,39 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .check-list li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 12px; line-height: 1.55; }
 .check-list li span { color: var(--green); font-size: 10px; font-weight: 750; }
 
+.gate-section { width: 100%; max-width: none; padding-left: max(24px, calc((100vw - var(--content)) / 2)); padding-right: max(24px, calc((100vw - var(--content)) / 2)); background: var(--surface); }
+.gate-shell { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(330px, .8fr); gap: 18px; }
+.gate-flow { padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+.gate-flow-head h3 { margin: 4px 0 0; font-size: 21px; }
+.gate-steps { margin: 22px 0 0; padding: 0; list-style: none; }
+.gate-steps li { position: relative; padding: 0 0 20px 44px; }
+.gate-steps li:last-child { padding-bottom: 0; }
+.gate-steps li:not(:last-child)::after { content: ""; position: absolute; left: 14px; top: 30px; bottom: 1px; width: 1px; background: var(--line); }
+.gate-steps > li > span { position: absolute; left: 0; top: 0; width: 29px; height: 29px; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--surface-2); color: var(--muted); font-size: 9px; font-weight: 750; }
+.gate-steps strong { display: block; color: var(--ink); font-size: 14px; line-height: 1.45; }
+.gate-steps p { margin: 3px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.gate-steps em { display: inline-block; margin-top: 6px; padding: 2px 7px; border-radius: 999px; background: var(--green-soft); color: var(--green-dark); font-size: 9px; font-style: normal; font-weight: 700; }
+.gate-steps .is-gate > span { border-color: var(--green); background: var(--green); color: #fff; }
+.gate-steps .is-gate:not(:last-child)::after { background: #b9d8cd; }
+.gate-steps .is-hard-check > span { border-color: #d6c39e; background: var(--amber-soft); color: var(--amber); }
+.gate-rule-note { margin-top: 22px; padding: 14px 16px; border-left: 3px solid var(--green); background: var(--green-soft); }
+.gate-rule-note strong { display: block; color: var(--green-dark); font-size: 12px; }
+.gate-rule-note p { margin: 3px 0 0; color: #315f4f; font-size: 11px; line-height: 1.6; }
+.gate-device { align-self: stretch; padding: 22px; border: 1px solid #cfe0d8; border-radius: var(--radius); background: linear-gradient(145deg, #e9f3ef, #f8fbfa); }
+.gate-device-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--green-dark); font-size: 10px; font-weight: 750; letter-spacing: .08em; }
+.gate-device-head em { padding: 3px 7px; border: 1px solid #c3d8ce; border-radius: 999px; color: var(--muted); font-size: 9px; font-style: normal; font-weight: 650; letter-spacing: 0; }
+.gate-device-body { margin-top: 13px; padding: 18px; border: 1px solid #d8e4de; border-radius: 11px; background: #fff; box-shadow: 0 12px 30px rgba(31, 76, 60, .08); }
+.gate-device-label { display: inline-block; padding: 3px 7px; border-radius: 3px; background: var(--surface); color: var(--muted); font-size: 9px; font-weight: 650; }
+.gate-alert-card { display: flex; gap: 12px; margin-top: 17px; padding: 16px; border: 1px solid #eccaca; border-radius: 6px; background: var(--red-soft); }
+.gate-alert-mark { width: 27px; height: 27px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--red); color: #fff; font-size: 15px; font-weight: 750; }
+.gate-alert-card h3 { margin: 0; font-size: 15px; line-height: 1.4; }
+.gate-alert-card p { margin: 6px 0 0; color: #7c2b2b; font-size: 14px; font-weight: 700; line-height: 1.65; }
+.gate-alert-card small { display: block; margin-top: 6px; color: #8d5f5f; font-size: 10px; line-height: 1.55; }
+.gate-mock-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.gate-mock-actions span { display: grid; min-height: 36px; place-items: center; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink-2); font-size: 11px; font-weight: 650; }
+.gate-mock-actions span:last-child { border-color: var(--green); background: var(--green); color: #fff; }
+.gate-device-foot { margin: 14px 2px 0; color: #52675d; font-size: 10px; line-height: 1.6; }
+
 .decision-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
 .decision-table { width: 100%; min-width: 780px; border-collapse: collapse; font-size: 13px; }
 .decision-table th { padding: 12px 15px; border-bottom: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 11px; font-weight: 650; text-align: left; }
@@ -234,6 +267,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .total-card { grid-column: 1 / -1; }
   .config-layout { grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); }
   .document-shell { grid-template-columns: 210px minmax(0, 1fr); gap: 28px; }
+  .gate-shell { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 820px) {
@@ -255,6 +289,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .flow > i { height: 18px; transform: rotate(90deg); }
   .scope-note { grid-template-columns: 1fr; gap: 12px; }
   .simulator-section { padding-left: 18px; padding-right: 18px; }
+  .gate-section { padding-left: 18px; padding-right: 18px; }
   .simulator-shell { grid-template-columns: 1fr; }
   .simulator-controls { border-right: 0; border-bottom: 1px solid var(--line); }
   .document-shell { grid-template-columns: 1fr; }
@@ -275,6 +310,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .usage-summary > div { padding: 13px 15px; }
   .usage-summary strong { font-size: 22px; }
   .usage-panel, .simulator-controls, .config-card, .validation-card { padding: 20px; }
+  .gate-flow, .gate-device { padding: 20px; }
+  .gate-device-body { padding: 15px; }
   .control-actions { grid-template-columns: 1fr; }
   .config-fields { grid-template-columns: 1fr; }
   .config-field.wide, .limit-fields { grid-column: auto; }

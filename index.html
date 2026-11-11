@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制 PRD 评审站：日、周、月三周期次数按需配置，门店总量与柜机/App分入口独立执行，覆盖活动集合规则、冻结与已参与计数、执行中初始化、参与详情和订单明细。">
+  <meta name="description" content="门店换新活动参与次数限制 PRD 评审站：日、周、月三周期次数按需配置，柜机/App 入口独立执行，并在进入顾客信息页时前置拦截；覆盖 App 专属提示、冻结与已参与计数、执行中初始化、参与详情和订单明细。">
   <title>门店换新活动参与次数限制｜PRD 评审站</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=20261111-6">
+  <link rel="stylesheet" href="assets/styles.css?v=20261111-7">
   <script src="assets/marked.min.js?v=20261110-2" defer></script>
-  <script src="assets/app.js?v=20261111-10" defer></script>
+  <script src="assets/app.js?v=20261111-11" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -25,6 +25,7 @@
       <a href="#model">规则模型</a>
       <a href="#simulator">次数示意</a>
       <a href="#configuration">配置项</a>
+      <a href="#frontend-gate">前端拦截</a>
       <a href="prototype/">配置原型</a>
       <a href="#decisions">实施边界</a>
       <a href="#prd">完整 PRD</a>
@@ -35,9 +36,9 @@
   <main id="main-content">
     <section class="hero" id="overview" aria-labelledby="page-title">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v1.0</div>
+        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v1.1</div>
         <h1 id="page-title">门店换新活动参与次数限制</h1>
-        <p class="hero-lead">规则不绑定门店，通过活动 ID 集合匹配活动；运行时按门店独立计数。门店日/周/月总量按周期选填，柜机与 App 次数独立配置；未配置门店总量的周期只做统计，不执行门店级拦截。参与数量统一按“冻结中 + 已参与”计算。</p>
+        <p class="hero-lead">规则不绑定门店，通过活动 ID 集合匹配活动；运行时按门店独立计数。总次数与柜机/App 次数均按周期选配，并在进入顾客信息页时前置拦截；提交订单时继续原子冻结。参与数量统一按“冻结中 + 已参与”计算。</p>
         <div class="hero-meta" aria-label="文档信息">
           <span><b>需求 ID</b>REQ-20261110-001</span>
           <span><b>更新</b>2026-11-11</span>
@@ -159,7 +160,7 @@
           <span class="section-index">03 / 次数示意</span>
           <h2 id="simulator-title">按日周期试算门店总量或分入口次数</h2>
         </div>
-        <p>运营内部试算，用来说明门店总量留空时柜机与 App 如何按各自次数独立生效；不面向门店端。</p>
+        <p>运营内部试算，用来说明门店总量留空时柜机与 App 如何按各自次数独立生效，并预览进入顾客信息页时的拦截文案；不面向门店端。</p>
       </div>
 
       <div class="simulator-shell">
@@ -174,10 +175,10 @@
             <label>App 日次数<input id="app-limit" type="number" min="1" max="9999" step="1" value="8"></label>
           </div>
           <div class="control-actions">
-            <button class="button primary" type="button" id="simulate-cabinet">模拟柜机成交</button>
-            <button class="button secondary" type="button" id="simulate-app">模拟 App 成交</button>
+            <button class="button primary" type="button" id="simulate-cabinet">模拟柜机办单</button>
+            <button class="button secondary" type="button" id="simulate-app">模拟 App 办单</button>
           </div>
-          <p class="demo-note">示意器仅演示日周期。门店日总数量留空时，柜机与 App 按各自日次数独立限制，门店合计仍展示但不参与拦截；已配置门店总量时，两个入口同时受总量约束。9 项次数至少配置 1 项。</p>
+          <p class="demo-note">示意器仅演示日周期和拦截结果。门店日总数量留空时，柜机与 App 按各自日次数独立限制；命中限制时模拟“进入顾客信息页”被拦截并展示对应入口文案。前置校验不占次数，真实提交订单仍需原子冻结校验。</p>
         </div>
 
         <div class="usage-panel" aria-live="polite">
@@ -257,8 +258,43 @@
             <li><span>08</span>创建、编辑、启停和导入记录操作日志</li>
             <li><span>09</span>首次启用、重新启用和新增活动必须完成期初初始化</li>
             <li><span>10</span>门店端不展示冻结中、已参与或剩余次数</li>
-            <li><span>11</span>活动数量耗尽统一提示“活动数量已用完，请选择其他活动参与”</li>
+            <li><span>11</span>进入顾客信息页前校验；App 次数耗尽提示“APP端办单限量开启，请移步柜机端办理。”</li>
+            <li><span>12</span>柜机继续提示“活动数量已用完，请选择其他活动参与”，提交订单仍执行原子冻结</li>
           </ol>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section gate-section" id="frontend-gate" aria-labelledby="frontend-gate-title">
+      <div class="section-heading">
+        <div>
+          <span class="section-index">05 / 前端拦截</span>
+          <h2 id="frontend-gate-title">进入顾客信息页前先拦住</h2>
+        </div>
+        <p>App 与柜机使用不同提示；前置校验只做资格判断，提交订单时仍执行原子冻结，避免并发穿透。</p>
+      </div>
+      <div class="gate-shell">
+        <div class="gate-flow">
+          <div class="gate-flow-head"><span class="section-index">APP ORDER FLOW</span><h3>App 办单校验路径</h3></div>
+          <ol class="gate-steps">
+            <li><span>01</span><div><strong>选择换新活动</strong><p>识别门店、活动、入口与订单归宿，匹配次数规则。</p></div></li>
+            <li class="is-gate"><span>02</span><div><strong>点击进入顾客信息页</strong><p>先执行前置次数校验；命中限制时不进入页面。</p><em>新增拦截点</em></div></li>
+            <li><span>03</span><div><strong>通过后填写顾客信息</strong><p>校验结果不冻结次数，退出或返回后再次进入需重新校验。</p></div></li>
+            <li class="is-hard-check"><span>04</span><div><strong>提交订单原子冻结</strong><p>若期间次数被其他订单占用，提交仍会失败，不允许超限成交。</p></div></li>
+          </ol>
+          <div class="gate-rule-note"><strong>只读校验，不是占用</strong><p>前置校验不创建冻结记录、不改变参与数量；最终可用性只以提交订单的原子冻结结果为准。</p></div>
+        </div>
+        <aside class="gate-device" aria-label="App 进入顾客信息页的拦截弹窗示意">
+          <div class="gate-device-head"><span>APP · 换新办单</span><em>拦截示意</em></div>
+          <div class="gate-device-body">
+            <span class="gate-device-label">进入顾客信息页</span>
+            <div class="gate-alert-card">
+              <span class="gate-alert-mark" aria-hidden="true">!</span>
+              <div><h3>暂不能继续办理</h3><p>APP端办单限量开启，请移步柜机端办理。</p><small>柜机入口将独立校验次数。</small></div>
+            </div>
+            <div class="gate-mock-actions" aria-hidden="true"><span>返回活动选择</span><span>去柜机办理</span></div>
+          </div>
+          <p class="gate-device-foot">“请移步柜机”不代表柜机一定可办；柜机次数同样耗尽时，按柜机通用文案提示。</p>
         </aside>
       </div>
     </section>
@@ -266,7 +302,7 @@
     <section class="section" id="decisions" aria-labelledby="decisions-title">
       <div class="section-heading">
         <div>
-          <span class="section-index">05 / 已确认</span>
+          <span class="section-index">06 / 已确认</span>
           <h2 id="decisions-title">业务边界已锁定</h2>
         </div>
         <p>以下事项已确认，不再作为产品待决策项；仅保留技术实现层面的性能评估。</p>
@@ -282,7 +318,8 @@
             <tr><td>参与详情与订单明细</td><td>参与详情展示 9 个门店/柜机/App 的日周月数量；订单明细展示门店名称、订单号、参与状态</td><td>运营内部只读，门店人员不可见</td><td>业务 + 产品</td></tr>
             <tr><td>参与数量统计口径</td><td>门店、柜机、App 的日/周/月数量均包含冻结中 + 已参与订单</td><td>退款、取消或释放后不计入</td><td>业务 + 技术</td></tr>
             <tr><td>“执行中”状态</td><td>启用后先执行历史数据回放，成功后变为启用中并开始执行规则</td><td>执行中阻断新参与，失败不得显示启用中</td><td>产品 + 技术</td></tr>
-            <tr><td>次数耗尽提示</td><td>门店、柜机、App 的日/周/月次数耗尽均使用统一文案</td><td>前端不暴露具体命中维度</td><td>业务 + 产品</td></tr>
+            <tr><td>次数耗尽提示</td><td>App 使用“APP端办单限量开启，请移步柜机端办理。”；柜机继续使用通用文案</td><td>前端不暴露具体命中维度，柜机独立校验</td><td>业务 + 产品</td></tr>
+            <tr><td>前端拦截时点</td><td>点击进入顾客信息页时先校验；提交订单仍执行原子冻结</td><td>前置校验不占次数，二次硬校验防并发穿透</td><td>产品 + 技术</td></tr>
             <tr><td>门店总量与分入口次数</td><td>门店日/周/月总量均可留空；未配置的周期按柜机/App 次数独立执行</td><td>9 项次数至少配置 1 项，门店合计继续展示</td><td>业务 + 产品</td></tr>
           </tbody>
         </table>
@@ -292,7 +329,7 @@
     <section class="section document-section" id="prd" aria-labelledby="prd-title">
       <div class="section-heading document-heading">
         <div>
-          <span class="section-index">06 / 完整文档</span>
+          <span class="section-index">07 / 完整文档</span>
           <h2 id="prd-title">产品需求文档</h2>
         </div>
         <div class="document-actions">
@@ -313,7 +350,7 @@
   </main>
 
   <footer class="footer">
-    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v1.0 · 草案</span></div>
+    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v1.1 · 草案</span></div>
     <p>本页为静态评审站，不连接真实活动、订单或退款系统；示例数据仅用于规则说明。<a href="review-record.md">评审与发布记录</a></p>
   </footer>
 
