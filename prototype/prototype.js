@@ -75,17 +75,18 @@
     ],
     'R-002': [
       {
-        id: 'LOG-R002-002', action: '编辑规则', operator: '陈运营', time: '2026-11-09 18:05', note: '取消柜机月次数限制，保留柜机日次数限制',
-        changes: [{ field: '柜机月次数', before: '200 次', after: '不执行' }]
+        id: 'LOG-R002-002', action: '编辑规则', operator: '陈运营', time: '2026-11-09 18:05', note: '调整 App 周次数；门店日/周/月总数量继续不执行。',
+        changes: [{ field: 'App 周次数', before: '20 次', after: '30 次' }]
       },
       {
         id: 'LOG-R002-001', action: '创建规则', operator: '陈运营', time: '2026-11-05 09:40', note: '',
         changes: [
           { field: '活动 ID 集合', before: '—', after: 'ACT-20261105、ACT-20261108' },
-          { field: '门店日总数量', before: '—', after: '30 次' },
-          { field: '门店周总数量', before: '—', after: '150 次' },
-          { field: '门店月总数量', before: '—', after: '500 次' },
-          { field: '柜机月次数', before: '—', after: '200 次' },
+          { field: '柜机日次数', before: '—', after: '12 次' },
+          { field: '柜机周次数', before: '—', after: '50 次' },
+          { field: 'App 日次数', before: '—', after: '25 次' },
+          { field: 'App 周次数', before: '—', after: '20 次' },
+          { field: 'App 月次数', before: '—', after: '400 次' },
           { field: '状态', before: '—', after: '启用中' }
         ]
       }
@@ -130,7 +131,7 @@
 
   let rules = [
     { id: 'R-001', name: '双十一换新·门店次数', status: 'enabled', activities: ['ACT-20261101', 'ACT-20261103'], dailyTotal: 50, weeklyTotal: 250, monthlyTotal: 800, dailyCabinet: 20, weeklyCabinet: 90, monthlyCabinet: 300, dailyApp: 40, weeklyApp: 180, monthlyApp: 600, updated: '2026-11-10 14:32', updater: '王运营', logs: seedLogs['R-001'] },
-    { id: 'R-002', name: '月中换新·次数兜底', status: 'enabled', activities: ['ACT-20261105', 'ACT-20261108'], dailyTotal: 30, weeklyTotal: 150, monthlyTotal: 500, dailyCabinet: 12, weeklyCabinet: 50, monthlyCabinet: null, dailyApp: 25, weeklyApp: null, monthlyApp: 400, updated: '2026-11-09 18:05', updater: '陈运营', logs: seedLogs['R-002'] },
+    { id: 'R-002', name: '月中换新·入口独立次数', status: 'enabled', activities: ['ACT-20261105', 'ACT-20261108'], dailyTotal: null, weeklyTotal: null, monthlyTotal: null, dailyCabinet: 12, weeklyCabinet: 50, monthlyCabinet: null, dailyApp: 25, weeklyApp: 30, monthlyApp: 400, updated: '2026-11-09 18:05', updater: '陈运营', logs: seedLogs['R-002'] },
     { id: 'R-003', name: '九月开学换新（已停用）', status: 'disabled', activities: ['ACT-20260901'], dailyTotal: 20, weeklyTotal: 120, monthlyTotal: 260, dailyCabinet: null, weeklyCabinet: null, monthlyCabinet: null, dailyApp: 16, weeklyApp: null, monthlyApp: 180, updated: '2026-09-30 17:40', updater: '王运营', logs: seedLogs['R-003'] },
     { id: 'R-004', name: '门店焕新·历史回放中', status: 'executing', activities: ['ACT-20261112'], dailyTotal: 36, weeklyTotal: 180, monthlyTotal: 480, dailyCabinet: 18, weeklyCabinet: 72, monthlyCabinet: 240, dailyApp: 24, weeklyApp: 120, monthlyApp: 300, updated: '2026-11-10 15:10', updater: '系统任务', logs: seedLogs['R-004'], initialization: { mode: 'activation', batchId: 'ACT-20261110-001', trigger: '新建后启用', activities: ['ACT-20261112'], demo: true } }
   ];
@@ -435,7 +436,7 @@
       input.value = '';
       input.closest('.number-wrap').classList.remove('invalid');
     });
-    $('#save-hint').textContent = '活动 ID 集合及门店日、周、月总数量均为必填项';
+    $('#save-hint').textContent = '活动 ID 必填；9 项次数均选填，但至少填写 1 项';
     renderSelectedActivities();
     renderActivityOptions();
   };
@@ -446,9 +447,9 @@
     $('#rule-name').value = rule.name;
     const status = $(`input[name="rule-status"][value="${rule.status}"]`);
     if (status) status.checked = true;
-    form.elements.dailyTotal.value = rule.dailyTotal;
+    form.elements.dailyTotal.value = rule.dailyTotal ?? '';
     form.elements.weeklyTotal.value = rule.weeklyTotal ?? '';
-    form.elements.monthlyTotal.value = rule.monthlyTotal;
+    form.elements.monthlyTotal.value = rule.monthlyTotal ?? '';
     form.elements.dailyCabinet.value = rule.dailyCabinet ?? '';
     form.elements.weeklyCabinet.value = rule.weeklyCabinet ?? '';
     form.elements.monthlyCabinet.value = rule.monthlyCabinet ?? '';
@@ -525,12 +526,12 @@
     renderActivityOptions();
     setError('#activity-error');
     $('.activity-picker')?.classList.remove('invalid');
-    $('#save-hint').textContent = '活动已添加，请继续填写门店日、周、月总数量';
+    $('#save-hint').textContent = '活动已添加，请至少填写 1 项门店总量或柜机/App 次数';
   };
 
   const collectQuotas = () => {
     const quotas = {};
-    let missingRequired = false;
+    let filled = 0;
     let invalid = false;
     $$('.quota-field').forEach((field) => {
       const key = field.dataset.quota;
@@ -539,13 +540,10 @@
       wrap.classList.remove('invalid');
       const rawValue = number.value.trim();
       if (!rawValue) {
-        if (field.dataset.required === 'true') {
-          missingRequired = true;
-          wrap.classList.add('invalid');
-        }
         quotas[key] = null;
         return;
       }
+      filled += 1;
       const value = Number(rawValue);
       if (!Number.isSafeInteger(value) || value <= 0) {
         invalid = true;
@@ -553,7 +551,7 @@
       }
       quotas[key] = value;
     });
-    return { quotas, missingRequired, invalid };
+    return { quotas, filled, invalid };
   };
 
   const validateForm = () => {
@@ -575,16 +573,17 @@
     }
     const quotaResult = collectQuotas();
     setError('#limit-error');
-    if (quotaResult.missingRequired) {
-      setError('#limit-error', '活动 ID 集合及门店日、周、月总数量均为必填项。');
+    if (!quotaResult.invalid && quotaResult.filled === 0) {
+      setError('#limit-error', '门店总次数及柜机/App次数共 9 项均为选填，但至少填写 1 项。');
+      $$('.quota-field .number-wrap').forEach((wrap) => wrap.classList.add('invalid'));
       valid = false;
     } else if (quotaResult.invalid) {
-      setError('#limit-error', '已填写的次数必须为大于 0 的整数；未填写的分归宿次数不执行。');
+      setError('#limit-error', '已填写的次数必须为大于 0 的整数；留空的次数不执行对应周期限制。');
       valid = false;
     }
     if (!valid) {
       $('#save-hint').textContent = '请修正标红项后再保存';
-      toast('配置未保存，请检查必填项与活动占用冲突。', 'error');
+      toast('配置未保存，请检查次数配置与活动占用冲突。', 'error');
     }
     return valid;
   };
@@ -976,12 +975,9 @@
         }
       });
 
-      const readCount = (rawValue, label, required) => {
+      const readCount = (rawValue, label) => {
         const value = rawValue.trim();
-        if (!value) {
-          if (required) errors.add(`第 ${line} 行：${label}不能为空。`);
-          return null;
-        }
+        if (!value) return null;
         const number = Number(value);
         if (!Number.isSafeInteger(number) || number <= 0) {
           errors.add(`第 ${line} 行：${label}必须为大于 0 的整数。`);
@@ -990,16 +986,20 @@
         return number;
       };
 
-      const dailyTotal = readCount(rawDailyTotal, '门店日总数量', true);
-      const weeklyTotal = readCount(rawWeeklyTotal, '门店周总数量', layout !== 'legacy');
-      if (layout === 'legacy') errors.add(`第 ${line} 行：旧版 9 列模板缺少门店周总数量，周总数量已改为必填，请使用新版 12 列模板。`);
-      const monthlyTotal = readCount(rawMonthlyTotal, '门店月总数量', true);
-      const dailyCabinet = readCount(rawDailyCabinet, '柜机日次数', false);
-      const weeklyCabinet = readCount(rawWeeklyCabinet, '柜机周次数', false);
-      const monthlyCabinet = readCount(rawMonthlyCabinet, '柜机月次数', false);
-      const dailyApp = readCount(rawDailyApp, 'App 日次数', false);
-      const weeklyApp = readCount(rawWeeklyApp, 'App 周次数', false);
-      const monthlyApp = readCount(rawMonthlyApp, 'App 月次数', false);
+      const dailyTotal = readCount(rawDailyTotal, '门店日总数量');
+      const weeklyTotal = readCount(rawWeeklyTotal, '门店周总数量');
+      const monthlyTotal = readCount(rawMonthlyTotal, '门店月总数量');
+      const dailyCabinet = readCount(rawDailyCabinet, '柜机日次数');
+      const weeklyCabinet = readCount(rawWeeklyCabinet, '柜机周次数');
+      const monthlyCabinet = readCount(rawMonthlyCabinet, '柜机月次数');
+      const dailyApp = readCount(rawDailyApp, 'App 日次数');
+      const weeklyApp = readCount(rawWeeklyApp, 'App 周次数');
+      const monthlyApp = readCount(rawMonthlyApp, 'App 月次数');
+
+      const countFields = [dailyTotal, weeklyTotal, monthlyTotal, dailyCabinet, weeklyCabinet, monthlyCabinet, dailyApp, weeklyApp, monthlyApp];
+      if (countFields.every((value) => value === null) && [rawDailyTotal, rawWeeklyTotal, rawMonthlyTotal, rawDailyCabinet, rawWeeklyCabinet, rawMonthlyCabinet, rawDailyApp, rawWeeklyApp, rawMonthlyApp].every((value) => !value.trim())) {
+        errors.add(`第 ${line} 行：门店总次数及柜机/App次数共 9 项至少填写 1 项。`);
+      }
 
       rows.push({ line, name, activities: activityIds, dailyTotal, weeklyTotal, monthlyTotal, dailyCabinet, weeklyCabinet, monthlyCabinet, dailyApp, weeklyApp, monthlyApp, status });
     });
@@ -1021,7 +1021,7 @@
     importMore.hidden = true;
     importText.classList.remove('invalid');
     setError('#import-error');
-    $('#import-hint').textContent = '支持粘贴 CSV 或上传文件，校验通过后整批导入';
+    $('#import-hint').textContent = '支持粘贴 CSV 或上传文件；每行至少 1 项次数，校验通过后整批导入';
   };
 
   const renderImportPreview = (result) => {
@@ -1049,9 +1049,9 @@
         <td class="import-row-id">${row.line}</td>
         <td>${escapeHtml(row.name || '未命名（导入时生成）')}</td>
         <td>${escapeHtml(row.activities.join(' | ') || '—')}</td>
-        <td>${row.dailyTotal ?? '缺失'} / ${row.weeklyTotal ?? '缺失'} / ${row.monthlyTotal ?? '缺失'}</td>
-        <td>${row.dailyCabinet ?? '—'} / ${row.weeklyCabinet ?? '—'} / ${row.monthlyCabinet ?? '—'}</td>
-        <td>${row.dailyApp ?? '—'} / ${row.weeklyApp ?? '—'} / ${row.monthlyApp ?? '—'}</td>
+        <td>${row.dailyTotal ?? '不执行'} / ${row.weeklyTotal ?? '不执行'} / ${row.monthlyTotal ?? '不执行'}</td>
+        <td>${row.dailyCabinet ?? '不执行'} / ${row.weeklyCabinet ?? '不执行'} / ${row.monthlyCabinet ?? '不执行'}</td>
+        <td>${row.dailyApp ?? '不执行'} / ${row.weeklyApp ?? '不执行'} / ${row.monthlyApp ?? '不执行'}</td>
         <td>${row.status === 'enabled' ? '启用（执行中）' : '停用'}</td>
       </tr>`).join('');
     importMore.hidden = result.rows.length <= 20;
@@ -1148,8 +1148,8 @@
   const downloadTemplate = () => {
     const available = activities.filter((activity) => !ownerOfActivity(activity.id)).slice(0, 2);
     const rows = [IMPORT_HEADERS.join(',')];
-    if (available[0]) rows.push(['导入示例规则 A', available[0].id, 20, 80, 200, 8, 20, '', 12, 40, '', '启用'].join(','));
-    if (available[1]) rows.push(['导入示例规则 B', available[1].id, 10, 40, 100, 6, 20, 60, '', '', '', '停用'].join(','));
+    if (available[0]) rows.push(['导入示例规则 A', available[0].id, '', '', '', 8, 20, '', 12, 40, '', '启用'].join(','));
+    if (available[1]) rows.push(['导入示例规则 B', available[1].id, '', 60, 200, '', '', '', '', '', '', '停用'].join(','));
     const blob = new Blob([`\uFEFF${rows.join('\n')}`], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -1167,8 +1167,8 @@
       return;
     }
     const rows = [IMPORT_HEADERS.join(',')];
-    rows.push(['导入示例规则 A', available[0].id, 20, 80, 200, 8, 20, '', 12, 40, '', '启用'].join(','));
-    if (available[1]) rows.push(['导入示例规则 B', available[1].id, 10, 40, 100, 6, 20, 60, '', '', '', '停用'].join(','));
+    rows.push(['导入示例规则 A', available[0].id, '', '', '', 8, 20, '', 12, 40, '', '启用'].join(','));
+    if (available[1]) rows.push(['导入示例规则 B', available[1].id, '', 60, 200, '', '', '', '', '', '', '停用'].join(','));
     importText.value = rows.join('\n');
     invalidateImportPreview();
     previewImport();

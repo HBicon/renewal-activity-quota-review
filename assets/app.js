@@ -4,7 +4,7 @@
 
   const simulator = {
     used: { cabinet: 0, app: 0 },
-    limits: { total: 10, cabinet: 4, app: 8 }
+    limits: { total: null, cabinet: 4, app: 8 }
   };
 
   const dom = {
@@ -29,18 +29,34 @@
     message: $('#simulator-message')
   };
 
-  const readLimit = (input, fallback) => {
+  const readLimit = (input) => {
     const value = Number.parseInt(input.value, 10);
-    return Number.isFinite(value) && value > 0 ? value : fallback;
+    return Number.isFinite(value) && value > 0 ? value : null;
   };
 
   const updateProgress = (element, used, limit) => {
+    if (limit === null) {
+      element.querySelector('span').style.width = '0%';
+      element.setAttribute('aria-valuemax', '1');
+      element.setAttribute('aria-valuenow', '0');
+      element.setAttribute('aria-valuetext', '不执行');
+      element.classList.remove('warning', 'full');
+      return;
+    }
     const percent = Math.min(100, Math.max(0, (used / limit) * 100));
     element.querySelector('span').style.width = `${percent}%`;
     element.setAttribute('aria-valuemax', String(limit));
     element.setAttribute('aria-valuenow', String(used));
+    element.setAttribute('aria-valuetext', `${used} / ${limit}`);
     element.classList.toggle('warning', percent >= 75 && percent < 100);
     element.classList.toggle('full', percent >= 100);
+  };
+
+  const isBlocked = (entry) => {
+    const totalUsed = simulator.used.cabinet + simulator.used.app;
+    const totalBlocked = simulator.limits.total !== null && totalUsed >= simulator.limits.total;
+    const entryBlocked = simulator.limits[entry] !== null && simulator.used[entry] >= simulator.limits[entry];
+    return totalBlocked || entryBlocked;
   };
 
   const setMessage = (text, type = '') => {
@@ -49,29 +65,30 @@
   };
 
   const renderSimulator = () => {
-    simulator.limits.total = readLimit(dom.totalLimit, 1);
-    simulator.limits.cabinet = readLimit(dom.cabinetLimit, 1);
-    simulator.limits.app = readLimit(dom.appLimit, 1);
+    simulator.limits.total = readLimit(dom.totalLimit);
+    simulator.limits.cabinet = readLimit(dom.cabinetLimit);
+    simulator.limits.app = readLimit(dom.appLimit);
 
     const totalUsed = simulator.used.cabinet + simulator.used.app;
-    const totalRemaining = Math.max(0, simulator.limits.total - totalUsed);
-    const cabinetRemaining = Math.max(0, simulator.limits.cabinet - simulator.used.cabinet);
-    const appRemaining = Math.max(0, simulator.limits.app - simulator.used.app);
-    const exhausted = totalRemaining === 0;
+    const totalRemaining = simulator.limits.total === null ? '—' : Math.max(0, simulator.limits.total - totalUsed);
+    const cabinetRemaining = simulator.limits.cabinet === null ? '—' : Math.max(0, simulator.limits.cabinet - simulator.used.cabinet);
+    const appRemaining = simulator.limits.app === null ? '—' : Math.max(0, simulator.limits.app - simulator.used.app);
+    const configured = [simulator.limits.total, simulator.limits.cabinet, simulator.limits.app].some((limit) => limit !== null);
+    const exhausted = configured && isBlocked('cabinet') && isBlocked('app');
 
     dom.totalUsed.textContent = totalUsed;
     dom.totalRemaining.textContent = totalRemaining;
-    dom.totalLimitView.textContent = simulator.limits.total;
-    dom.totalLimitRow.textContent = simulator.limits.total;
+    dom.totalLimitView.textContent = simulator.limits.total ?? '不执行';
+    dom.totalLimitRow.textContent = simulator.limits.total ?? '不执行';
     dom.totalUsedRow.textContent = totalUsed;
     dom.cabinetUsed.textContent = simulator.used.cabinet;
-    dom.cabinetLimitView.textContent = simulator.limits.cabinet;
+    dom.cabinetLimitView.textContent = simulator.limits.cabinet ?? '不执行';
     dom.cabinetRemaining.textContent = cabinetRemaining;
     dom.appUsed.textContent = simulator.used.app;
-    dom.appLimitView.textContent = simulator.limits.app;
+    dom.appLimitView.textContent = simulator.limits.app ?? '不执行';
     dom.appRemaining.textContent = appRemaining;
 
-    dom.status.textContent = exhausted ? '活动数量已用完' : '可参与';
+    dom.status.textContent = !configured ? '待配置' : exhausted ? '活动数量已用完' : '可参与';
     dom.status.classList.toggle('blocked', exhausted);
 
     updateProgress(dom.totalProgress, totalUsed, simulator.limits.total);
@@ -83,12 +100,18 @@
     renderSimulator();
     const label = entry === 'cabinet' ? '柜机' : 'App';
     const totalUsed = simulator.used.cabinet + simulator.used.app;
+    const configured = [simulator.limits.total, simulator.limits.cabinet, simulator.limits.app].some((limit) => limit !== null);
 
-    if (totalUsed >= simulator.limits.total) {
+    if (!configured) {
+      setMessage('请至少填写 1 项日次数后再试算。', 'error');
+      return;
+    }
+
+    if (simulator.limits.total !== null && totalUsed >= simulator.limits.total) {
       setMessage(`本次${label}成交被拦截：活动数量已用完，请选择其他活动参与。`, 'error');
       return;
     }
-    if (simulator.used[entry] >= simulator.limits[entry]) {
+    if (simulator.limits[entry] !== null && simulator.used[entry] >= simulator.limits[entry]) {
       setMessage(`本次${label}成交被拦截：活动数量已用完，请选择其他活动参与。`, 'error');
       return;
     }
@@ -97,8 +120,10 @@
     renderSimulator();
 
     const nextTotal = simulator.used.cabinet + simulator.used.app;
-    if (nextTotal >= simulator.limits.total) {
+    if (simulator.limits.total !== null && nextTotal >= simulator.limits.total) {
       setMessage(`本次${label}成交已计入 1 次。门店总次数刚刚用完，柜机和 App 此后都会被拦截。`, 'success');
+    } else if (simulator.limits.total === null) {
+      setMessage(`本次${label}成交已计入 1 次。门店日总量未配置，仅按柜机/App 各自日次数独立统计。`, 'success');
     } else {
       setMessage(`本次${label}成交已计入 1 次，门店总次数同步 +1。`, 'success');
     }
@@ -107,7 +132,7 @@
   const resetSimulator = () => {
     simulator.used.cabinet = 0;
     simulator.used.app = 0;
-    dom.totalLimit.value = 10;
+    dom.totalLimit.value = '';
     dom.cabinetLimit.value = 4;
     dom.appLimit.value = 8;
     renderSimulator();

@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：支持日、自然周、月三周期次数限制，覆盖活动 ID 唯一占用、执行中初始化、参与详情、订单明细、批量导入和操作日志。">
+  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：支持日、自然周、月三周期次数按需配置，覆盖活动 ID 唯一占用、执行中初始化、分入口独立统计、参与详情、订单明细、批量导入和操作日志。">
   <title>换新活动次数限制｜配置菜单原型</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="prototype.css?v=20261111-10">
-  <script src="prototype.js?v=20261111-10" defer></script>
+  <link rel="stylesheet" href="prototype.css?v=20261111-11">
+  <script src="prototype.js?v=20261111-12" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -58,7 +58,7 @@
 
       <section class="scope-banner" aria-label="配置口径提示">
         <span class="scope-icon" aria-hidden="true">i</span>
-        <div><strong>活动 ID 集合及门店日、周、月总数量均为必填项。</strong><p>同一活动仅能被一条启用中或执行中规则占用，停用规则不占用活动。启用后规则先进入“执行中”，完成当前自然日/自然周/自然月历史回放与冻结订单补建后变为“启用中”。参与数量包含冻结中与已参与（成交）订单；初始化失败不得生效，门店端不展示剩余次数。</p><p class="scope-example"><b>门店端次数耗尽提示：</b>活动数量已用完，请选择其他活动参与</p></div>
+        <div><strong>活动 ID 必填；门店日、周、月总数量与柜机/App 各周期次数均为选填，但 9 项次数合计至少填写 1 项。</strong><p>未配置门店某周期总数量时，该周期不执行门店级拦截，按已配置的柜机/App 次数独立执行；门店合计数量仍用于参与统计展示。同一活动仅能被一条启用中或执行中规则占用。启用后先进入“执行中”，完成历史回放与冻结订单补建后变为“启用中”。参与数量包含冻结中与已参与（成交）订单。</p><p class="scope-example"><b>门店端次数耗尽提示：</b>活动数量已用完，请选择其他活动参与</p></div>
       </section>
 
       <section class="metrics" aria-label="配置概览">
@@ -125,14 +125,14 @@
         </section>
 
         <section class="form-section" aria-labelledby="quota-title">
-          <div class="form-section-head"><span>03</span><div><h3 id="quota-title">次数配置</h3><p>活动 ID 集合及门店日、周、月总数量为必填，三项总次数同时执行；柜机与 App 的日/周/月分归宿次数选填，未填写则不执行对应限制。</p></div></div>
+          <div class="form-section-head"><span>03</span><div><h3 id="quota-title">次数配置</h3><p>门店总次数与柜机/App 分归宿次数均为选填，但 9 项次数至少填写 1 项。每个已填写的次数按对应周期独立执行；未配置门店总次数的周期，按柜机/App 已填次数分别控制。</p></div></div>
           <small class="field-error limit-error" id="limit-error"></small>
           <div class="quota-group total-group">
-            <div class="quota-group-head"><div><span class="group-mark total">总</span><div><strong>门店总次数</strong><small>规则内全部活动、两个入口合计；日、自然周、自然月均必填并同时执行</small></div></div><span class="hard-limit">硬上限</span></div>
+            <div class="quota-group-head"><div><span class="group-mark total">总</span><div><strong>门店总次数（选填）</strong><small>规则内全部活动、两个入口合计；日、自然周、自然月可分别留空，留空则对应周期不执行门店级拦截</small></div></div><span class="hard-limit">按周期执行</span></div>
             <div class="quota-grid three-col">
-              <div class="quota-field" data-quota="dailyTotal" data-required="true"><label class="quota-label" for="dailyTotal">门店日总数量 <b>必填</b></label><div class="number-wrap"><input id="dailyTotal" name="dailyTotal" type="number" min="1" step="1" placeholder="请输入日总数量" aria-label="门店日总数量"><span>次</span></div></div>
-              <div class="quota-field" data-quota="weeklyTotal" data-required="true"><label class="quota-label" for="weeklyTotal">门店周总数量 <b>必填</b></label><div class="number-wrap"><input id="weeklyTotal" name="weeklyTotal" type="number" min="1" step="1" placeholder="请输入周总数量" aria-label="门店周总数量"><span>次</span></div></div>
-              <div class="quota-field" data-quota="monthlyTotal" data-required="true"><label class="quota-label" for="monthlyTotal">门店月总数量 <b>必填</b></label><div class="number-wrap"><input id="monthlyTotal" name="monthlyTotal" type="number" min="1" step="1" placeholder="请输入月总数量" aria-label="门店月总数量"><span>次</span></div></div>
+              <div class="quota-field" data-quota="dailyTotal"><label class="quota-label" for="dailyTotal">门店日总数量 <em>选填</em></label><div class="number-wrap"><input id="dailyTotal" name="dailyTotal" type="number" min="1" step="1" placeholder="留空则不执行日总量" aria-label="门店日总数量"><span>次</span></div></div>
+              <div class="quota-field" data-quota="weeklyTotal"><label class="quota-label" for="weeklyTotal">门店周总数量 <em>选填</em></label><div class="number-wrap"><input id="weeklyTotal" name="weeklyTotal" type="number" min="1" step="1" placeholder="留空则不执行周总量" aria-label="门店周总数量"><span>次</span></div></div>
+              <div class="quota-field" data-quota="monthlyTotal"><label class="quota-label" for="monthlyTotal">门店月总数量 <em>选填</em></label><div class="number-wrap"><input id="monthlyTotal" name="monthlyTotal" type="number" min="1" step="1" placeholder="留空则不执行月总量" aria-label="门店月总数量"><span>次</span></div></div>
             </div>
           </div>
           <div class="quota-group">
@@ -167,7 +167,7 @@
       </div>
 
       <footer class="drawer-foot">
-        <span id="save-hint">活动 ID 集合及门店日、周、月总数量均为必填项</span>
+        <span id="save-hint">活动 ID 必填；9 项次数均选填，但至少填写 1 项</span>
         <div><button class="button secondary" type="button" id="cancel-drawer">取消</button><button class="button primary" type="submit" id="save-rule">保存配置</button></div>
       </footer>
     </form>
@@ -197,10 +197,10 @@
       </div>
       <div class="drawer-body">
         <section class="form-section" aria-labelledby="import-format-title">
-          <div class="form-section-head"><span>01</span><div><h3 id="import-format-title">导入格式</h3><p>规则名称、分归宿次数和状态可留空；活动 ID 集合及门店日、周、月总数量必填。</p></div></div>
+          <div class="form-section-head"><span>01</span><div><h3 id="import-format-title">导入格式</h3><p>活动 ID 集合必填；门店日、周、月总数量及柜机/App 各周期次数均选填，但每行 9 项次数至少填写 1 项。</p></div></div>
           <div class="import-format">
             <code role="region" aria-label="CSV 表头格式，可横向滚动" tabindex="0">规则名称,活动ID集合,门店日总数量,门店周总数量,门店月总数量,柜机日次数,柜机周次数,柜机月次数,App日次数,App周次数,App月次数,状态</code>
-            <p>活动 ID 多个时用 <b>|</b> 分隔；状态可填“启用”或“停用”，留空默认启用并先进入执行中。空单元格表示不执行对应分归宿次数限制；旧版 9 列模板缺少必填的门店周总数量，系统会整批阻断并提示使用新版模板。</p>
+            <p>活动 ID 多个时用 <b>|</b> 分隔；状态可填“启用”或“停用”，留空默认启用并先进入执行中。任意次数单元格留空表示该周期不执行对应限制，但每行 9 项次数不能全部为空。旧版 9 列模板仍可导入，缺失的周字段按“不执行”处理。</p>
           </div>
           <div class="import-toolbar">
             <label class="button secondary compact file-button">选择 CSV 文件<input id="import-file" type="file" accept=".csv,text/csv"></label>
@@ -248,7 +248,7 @@
           <div><span>规则状态</span><strong id="participation-rule-status">—</strong></div>
           <div><span>统计周期</span><strong id="participation-period">—</strong></div>
         </div>
-        <p class="modal-note"><b>口径：</b>参与数量 = 冻结中 + 已参与（成交）；已退款、已取消或已释放的订单不计入。主数量为合计值，辅助文字展示拆分。</p>
+        <p class="modal-note"><b>口径：</b>参与数量 = 冻结中 + 已参与（成交）；已退款、已取消或已释放的订单不计入。门店某周期总数量未配置时，该周期仅展示合计统计，不执行门店级拦截；柜机/App按各自已填写次数独立执行。</p>
         <div class="modal-table-wrap" id="participation-table-wrap" role="region" aria-label="门店参与详情表格，可横向滚动" tabindex="0" hidden>
           <table class="detail-table participation-table">
             <caption class="sr-only">当前规则下各门店的日、周、月参与数量及订单明细入口</caption>
