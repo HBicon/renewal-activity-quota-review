@@ -71,7 +71,7 @@
     dom.appLimitView.textContent = simulator.limits.app;
     dom.appRemaining.textContent = appRemaining;
 
-    dom.status.textContent = exhausted ? '门店总次数已用完' : '可参与';
+    dom.status.textContent = exhausted ? '活动数量已用完' : '可参与';
     dom.status.classList.toggle('blocked', exhausted);
 
     updateProgress(dom.totalProgress, totalUsed, simulator.limits.total);
@@ -85,11 +85,11 @@
     const totalUsed = simulator.used.cabinet + simulator.used.app;
 
     if (totalUsed >= simulator.limits.total) {
-      setMessage(`本次${label}成交被拦截：门店总次数已用完，任一入口都不能继续参与。`, 'error');
+      setMessage(`本次${label}成交被拦截：活动数量已用完，请选择其他活动参与。`, 'error');
       return;
     }
     if (simulator.used[entry] >= simulator.limits[entry]) {
-      setMessage(`本次${label}成交被拦截：${label}入口次数已用完，另一入口在总次数未满时仍可参与。`, 'error');
+      setMessage(`本次${label}成交被拦截：活动数量已用完，请选择其他活动参与。`, 'error');
       return;
     }
 

@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制 PRD 评审站：活动集合规则、门店总数与柜机、App 分入口次数限制。">
+  <meta name="description" content="门店换新活动参与次数限制 PRD 评审站：活动集合规则、冻结与已参与计数、执行中初始化、参与详情和订单明细。">
   <title>门店换新活动参与次数限制｜PRD 评审站</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=20261110-4">
+  <link rel="stylesheet" href="assets/styles.css?v=20261110-5">
   <script src="assets/marked.min.js?v=20261110-2" defer></script>
-  <script src="assets/app.js?v=20261110-4" defer></script>
+  <script src="assets/app.js?v=20261110-5" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -35,12 +35,12 @@
   <main id="main-content">
     <section class="hero" id="overview" aria-labelledby="page-title">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v0.5</div>
+        <div class="eyebrow"><span class="eyebrow-dot"></span>产品需求文档 · 评审版 v0.6</div>
         <h1 id="page-title">门店换新活动参与次数限制</h1>
-        <p class="hero-lead">规则不绑定门店，通过活动 ID 集合匹配活动；运行时按门店独立计数。规则生效时回溯当前日/月历史成交，生成期初用量，避免中途配置绕过上限。</p>
+        <p class="hero-lead">规则不绑定门店，通过活动 ID 集合匹配活动；运行时按门店独立计数。参与数量统一按“冻结中 + 已参与”计算，规则启用后先进入执行中，历史数据回放完成才切换为启用中。</p>
         <div class="hero-meta" aria-label="文档信息">
           <span><b>需求 ID</b>REQ-20261110-001</span>
-          <span><b>更新</b>2026-11-10</span>
+          <span><b>更新</b>2026-11-11</span>
           <span><b>状态</b>草案 / 待业务评审</span>
         </div>
         <div class="hero-actions">
@@ -149,7 +149,7 @@
           <span class="scope-note-label">归属规则</span>
           <h3>一个活动在所有配置中只能归属一条规则</h3>
         </div>
-        <p>活动 ID 必填且全局唯一；首次启用、重新启用或新增活动时，系统回溯当前日/月历史成交生成期初用量。查询失败或初始化未完成时不得启用。门店端不展示已用、预占或剩余次数。</p>
+        <p>活动 ID 必填且全局唯一；首次启用、重新启用或新增活动时，系统回溯当前日/月历史成交生成期初用量。启用后先显示执行中，查询失败或初始化未完成时不得切换为启用中。门店端不展示冻结中、已参与或剩余次数。</p>
       </div>
     </section>
 
@@ -186,7 +186,7 @@
             <span class="usage-status" id="usage-status">可参与</span>
           </div>
           <div class="usage-summary">
-            <div><span>门店总已用</span><strong><b id="total-used">0</b> / <em id="total-limit-view">10</em></strong></div>
+            <div><span>门店参与数量</span><strong><b id="total-used">0</b> / <em id="total-limit-view">10</em></strong></div>
             <div><span>总剩余</span><strong id="total-remaining">10</strong></div>
           </div>
           <div class="usage-row" data-entry="total">
@@ -237,7 +237,7 @@
               <div><label>App 月次数 <span class="optional-mark">选填</span></label><strong>120</strong></div>
             </div>
           </div>
-          <div class="config-foot"><span>启用前回溯当前日/月历史成交，生成期初用量；初始化失败不得生效。</span><a class="mock-action" href="prototype/">打开交互原型</a></div>
+          <div class="config-foot"><span>启用后先进入执行中，回溯当前日/月历史数据；回放完成才切换为启用中。</span><a class="mock-action" href="prototype/">打开交互原型</a></div>
         </div>
 
         <aside class="validation-card" aria-labelledby="validation-title">
@@ -253,7 +253,8 @@
             <li><span>07</span>批量导入任一行失败则整批不导入</li>
             <li><span>08</span>创建、编辑、启停和导入记录操作日志</li>
             <li><span>09</span>首次启用、重新启用和新增活动必须完成期初初始化</li>
-            <li><span>10</span>门店端不展示已用、预占或剩余次数</li>
+            <li><span>10</span>门店端不展示冻结中、已参与或剩余次数</li>
+            <li><span>11</span>活动数量耗尽统一提示“活动数量已用完，请选择其他活动参与”</li>
           </ol>
         </aside>
       </div>
@@ -272,9 +273,13 @@
           <thead><tr><th>已确认项</th><th>确认口径</th><th>影响</th><th>责任方</th></tr></thead>
           <tbody>
             <tr><td>单日/单月次数上限的最大值</td><td>按正整数保存，不另设业务封顶值</td><td>技术侧负责存储上限和超范围校验</td><td>技术</td></tr>
-            <tr><td>门店人员查看剩余次数</td><td>不允许查看，只展示参与结果和拦截提示</td><td>门店端不提供用量查询</td><td>业务 + 产品</td></tr>
+            <tr><td>门店人员查看剩余次数</td><td>不允许查看，只展示参与结果和拦截提示</td><td>门店端不提供参与详情和订单明细</td><td>业务 + 产品</td></tr>
             <tr><td>“全店总次数 + 活动集合子次数”双层规则</td><td>本期不做，只做活动集合单层规则</td><td>不产生嵌套次数池</td><td>业务 + 产品</td></tr>
             <tr><td>规则首次生效的期初用量</td><td>回溯当前日/月历史成交；重新启用和新增活动同步补算</td><td>初始化失败不得启用或按 0 次放行</td><td>产品 + 技术</td></tr>
+            <tr><td>参与详情与订单明细</td><td>参与详情展示 7 个门店日/月数量；订单明细展示门店名称、订单号、参与状态</td><td>运营内部只读，门店人员不可见</td><td>业务 + 产品</td></tr>
+            <tr><td>参与数量统计口径</td><td>门店日/月、柜机日/月、App 日/月数量均包含冻结中 + 已参与订单</td><td>退款、取消或释放后不计入</td><td>业务 + 技术</td></tr>
+            <tr><td>“执行中”状态</td><td>启用后先执行历史数据回放，成功后变为启用中并开始执行规则</td><td>执行中阻断新参与，失败不得显示启用中</td><td>产品 + 技术</td></tr>
+            <tr><td>次数耗尽提示</td><td>门店、柜机、App 的日/月次数耗尽均使用统一文案</td><td>前端不暴露具体命中维度</td><td>业务 + 产品</td></tr>
           </tbody>
         </table>
       </div>
@@ -304,7 +309,7 @@
   </main>
 
   <footer class="footer">
-    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v0.5 · 草案</span></div>
+    <div><strong>门店换新活动参与次数限制</strong><span>REQ-20261110-001 · PRD v0.6 · 草案</span></div>
     <p>本页为静态评审站，不连接真实活动、订单或退款系统；示例数据仅用于规则说明。<a href="review-record.md">评审与发布记录</a></p>
   </footer>
 

@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：单菜单入口、活动 ID 唯一占用、生效期初用量初始化、门店与入口次数配置、批量导入和操作日志。">
+  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：单菜单入口、活动 ID 唯一占用、执行中初始化、参与详情、订单明细、批量导入和操作日志。">
   <title>换新活动次数限制｜配置菜单原型</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="prototype.css?v=20261110-5">
-  <script src="prototype.js?v=20261110-5" defer></script>
+  <link rel="stylesheet" href="prototype.css?v=20261110-6">
+  <script src="prototype.js?v=20261110-6" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -30,7 +30,7 @@
   <div class="app-shell">
     <aside class="sidebar" aria-label="配置菜单">
       <nav class="side-nav">
-        <a class="nav-item active" href="#" aria-current="page"><span class="nav-icon" aria-hidden="true">≡</span><span>换新活动次数限制</span><b class="nav-count" id="menu-rule-count">3</b></a>
+        <a class="nav-item active" href="#" aria-current="page"><span class="nav-icon" aria-hidden="true">≡</span><span>换新活动次数限制</span><b class="nav-count" id="menu-rule-count">4</b></a>
       </nav>
       <div class="sidebar-note">
         <strong>配置不绑门店</strong>
@@ -44,7 +44,7 @@
       <section class="page-heading" aria-labelledby="page-title">
         <div>
           <div class="title-line"><h1 id="page-title">换新活动次数限制</h1><span class="draft-badge">配置原型</span></div>
-          <p>将多个活动组合为一条次数限制规则，按门店统计成交次数。启用时回溯当前日/月历史成交生成期初用量，避免中途配置绕过上限。</p>
+          <p>将多个活动组合为一条次数限制规则，按门店统计冻结中与已参与订单。启用时先进入执行中，历史数据回放完成后才开始执行规则。</p>
         </div>
         <div class="heading-actions">
           <button class="button secondary" type="button" id="open-import">
@@ -58,14 +58,14 @@
 
       <section class="scope-banner" aria-label="配置口径提示">
         <span class="scope-icon" aria-hidden="true">i</span>
-        <div><strong>活动 ID 集合、门店日总数量、门店月总数量为必填项。</strong><p>首次启用、重新启用或新增活动时，按当前自然日和自然月回溯历史成交并生成期初用量；初始化失败不得生效。柜机、App 次数留空时不执行对应限制；门店端不展示剩余次数。</p></div>
+        <div><strong>活动 ID 集合、门店日总数量、门店月总数量为必填项。</strong><p>启用后规则先进入“执行中”，完成当前自然日/月历史回放与冻结订单补建后变为“启用中”。参与数量包含冻结中与已参与（成交）订单；初始化失败不得生效，门店端不展示剩余次数。</p><p class="scope-example"><b>门店端次数耗尽提示：</b>活动数量已用完，请选择其他活动参与</p></div>
       </section>
 
       <section class="metrics" aria-label="配置概览">
-        <article><span>规则总数</span><strong id="metric-rules">3</strong><small>条配置</small></article>
+        <article><span>规则总数</span><strong id="metric-rules">4</strong><small>条配置</small></article>
         <article><span>启用中</span><strong id="metric-enabled">2</strong><small>条规则</small></article>
-        <article><span>已占用活动</span><strong id="metric-activities">5</strong><small>个活动 ID</small></article>
-        <article><span>重复占用</span><strong class="safe" id="metric-conflicts">0</strong><small>冲突活动</small></article>
+        <article><span>执行中</span><strong class="executing" id="metric-executing">1</strong><small>条规则</small></article>
+        <article><span>已占用活动</span><strong id="metric-activities">6</strong><small>个活动 ID</small></article>
       </section>
 
       <section class="rules-panel" aria-labelledby="rules-title">
@@ -79,12 +79,12 @@
             <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m13 13 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
             <input id="rule-search" type="search" placeholder="搜索规则名称或活动 ID">
           </label>
-          <label class="select-wrap"><span class="sr-only">按状态筛选</span><select id="status-filter"><option value="all">全部状态</option><option value="enabled">启用中</option><option value="disabled">已停用</option></select></label>
+          <label class="select-wrap"><span class="sr-only">按状态筛选</span><select id="status-filter"><option value="all">全部状态</option><option value="enabled">启用中</option><option value="executing">执行中</option><option value="disabled">已停用</option></select></label>
         </div>
 
         <div class="table-wrap">
           <table class="rule-table">
-            <thead><tr><th>规则名称</th><th>活动 ID</th><th>门店日/月总数量</th><th>柜机日/月次数</th><th>App 日/月次数</th><th>状态</th><th>操作日志</th><th class="actions-col">操作</th></tr></thead>
+            <thead><tr><th>规则名称</th><th>活动 ID</th><th>门店日/月总数量</th><th>柜机日/月次数</th><th>App 日/月次数</th><th>状态</th><th>参与详情</th><th>操作日志</th><th class="actions-col">操作</th></tr></thead>
             <tbody id="rules-body"></tbody>
           </table>
           <div class="empty-state" id="empty-state" hidden>
@@ -92,7 +92,7 @@
             <p>可调整搜索关键词或状态筛选后重试。</p>
           </div>
         </div>
-        <div class="table-foot"><span id="table-foot-count">共 3 条配置</span><span>演示数据 · 不连接真实活动中心</span></div>
+        <div class="table-foot"><span id="table-foot-count">共 4 条配置</span><span>演示数据 · 不连接真实活动中心</span></div>
       </section>
     </main>
   </div>
@@ -153,12 +153,12 @@
         <section class="form-section" aria-labelledby="status-title">
           <div class="form-section-head"><span>04</span><div><h3 id="status-title">生效状态（选填）</h3><p>未操作时默认启用；停用后不再限制新订单，已有计数与活动占用关系保持不变。</p></div></div>
           <div class="status-options">
-            <label><input type="radio" name="rule-status" value="enabled" checked><span><strong>保存并启用</strong><small>先初始化当前日/月期初用量，再对命中门店生效</small></span></label>
+            <label><input type="radio" name="rule-status" value="enabled" checked><span><strong>保存并启用</strong><small>先进入执行中，历史数据回放完成后自动变为启用中</small></span></label>
             <label><input type="radio" name="rule-status" value="disabled"><span><strong>保存为停用</strong><small>保留活动占用，后续可手动启用</small></span></label>
           </div>
           <div class="activation-note" role="note">
             <span class="activation-note-mark">期初</span>
-            <div><strong>启用前必做：当前日/月生效初始化</strong><p>系统按规则活动集合，回溯所有命中门店在当前自然日、自然月的历史成交，补建在途预占后生成期初用量。查询失败、部分门店失败或预占补建失败时不得切换为生效，不会按 0 次放行。</p></div>
+            <div><strong>启用流程：执行中 → 启用中</strong><p>系统按规则活动集合，回溯所有命中门店在当前自然日、自然月的历史成交，补建冻结中订单后生成期初用量。回放期间规则内活动阻断新参与；查询失败、部分门店失败或冻结补建失败时不得进入启用中，也不会按 0 次放行。</p></div>
           </div>
         </section>
       </div>
@@ -197,7 +197,7 @@
           <div class="form-section-head"><span>01</span><div><h3 id="import-format-title">导入格式</h3><p>规则名称、入口次数和状态可留空；活动 ID 集合、门店日总数量、门店月总数量必填。</p></div></div>
           <div class="import-format">
             <code role="region" aria-label="CSV 表头格式，可横向滚动" tabindex="0">规则名称,活动ID集合,门店日总数量,门店月总数量,柜机日次数,柜机月次数,App日次数,App月次数,状态</code>
-            <p>活动 ID 多个时用 <b>|</b> 分隔；状态可填“启用”或“停用”，留空默认启用。空单元格表示不执行对应入口次数限制。</p>
+            <p>活动 ID 多个时用 <b>|</b> 分隔；状态可填“启用”或“停用”，留空默认启用并先进入执行中。空单元格表示不执行对应入口次数限制。</p>
           </div>
           <div class="import-toolbar">
             <label class="button secondary compact file-button">选择 CSV 文件<input id="import-file" type="file" accept=".csv,text/csv"></label>
@@ -227,6 +227,80 @@
       </footer>
     </div>
   </div>
+
+  <div class="modal-backdrop" id="participation-backdrop" hidden></div>
+  <section class="data-modal participation-modal" id="participation-modal" role="dialog" aria-modal="true" aria-labelledby="participation-modal-title" hidden>
+    <div class="modal-shell">
+      <div class="modal-head">
+        <div>
+          <span class="kicker">PARTICIPATION DETAIL</span>
+          <h2 id="participation-modal-title">参与详情</h2>
+          <p id="participation-modal-subtitle">按门店查看当前日/月参与数量。</p>
+        </div>
+        <button class="icon-button" type="button" id="close-participation" aria-label="关闭参与详情">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="participation-summary" aria-label="参与详情摘要">
+          <div><span>当前规则</span><strong id="participation-rule-name">—</strong></div>
+          <div><span>规则状态</span><strong id="participation-rule-status">—</strong></div>
+          <div><span>统计周期</span><strong id="participation-period">—</strong></div>
+        </div>
+        <p class="modal-note"><b>口径：</b>参与数量 = 冻结中 + 已参与（成交）；已退款、已取消或已释放的订单不计入。主数量为合计值，辅助文字展示拆分。</p>
+        <div class="modal-table-wrap" id="participation-table-wrap" role="region" aria-label="门店参与详情表格，可横向滚动" tabindex="0" hidden>
+          <table class="detail-table participation-table">
+            <caption class="sr-only">当前规则下各门店的日、月参与数量及订单明细入口</caption>
+            <thead><tr><th>门店名称</th><th>柜机日数量</th><th>App 日数量</th><th>门店日数量</th><th>门店月数量</th><th>柜机月数量</th><th>App 月数量</th><th>查看明细</th></tr></thead>
+            <tbody id="participation-body"></tbody>
+          </table>
+        </div>
+        <div class="modal-empty" id="participation-empty" hidden>
+          <strong>暂无参与数据</strong>
+          <p id="participation-empty-copy">当前周期内还没有冻结中或已参与订单。</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <span id="participation-foot-count">共 0 家门店</span>
+        <button class="button secondary" type="button" id="close-participation-footer">关闭</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal-backdrop order-backdrop" id="order-backdrop" hidden></div>
+  <section class="data-modal order-modal" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title" hidden>
+    <div class="modal-shell">
+      <div class="modal-head">
+        <div>
+          <span class="kicker">ORDER DETAIL</span>
+          <h2 id="order-modal-title">订单明细</h2>
+          <p id="order-modal-subtitle">查看当前门店仍占用次数的订单。</p>
+        </div>
+        <button class="icon-button" type="button" id="close-order" aria-label="关闭订单明细">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="order-context">
+          <div><span>门店名称</span><strong id="order-store-name">—</strong></div>
+          <div><span>所属规则</span><strong id="order-rule-name">—</strong></div>
+          <div><span>有效订单</span><strong id="order-total-count">0 笔</strong></div>
+        </div>
+        <p class="modal-note"><b>范围：</b>当前自然月内仍占用次数的订单，同一订单号只展示一次；状态仅包含冻结中与已参与。</p>
+        <div class="modal-table-wrap" id="order-table-wrap" role="region" aria-label="门店参与订单明细表格" tabindex="0" hidden>
+          <table class="detail-table order-table">
+            <caption class="sr-only">当前门店仍占用次数的参与订单</caption>
+            <thead><tr><th>门店名称</th><th>订单号</th><th>参与状态</th></tr></thead>
+            <tbody id="order-body"></tbody>
+          </table>
+        </div>
+        <div class="modal-empty" id="order-empty" hidden>
+          <strong>暂无有效订单</strong>
+          <p>该门店当前没有冻结中或已参与订单。</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <span id="order-foot-count">共 0 笔订单</span>
+        <div><button class="button secondary" type="button" id="back-to-participation">返回参与详情</button><button class="button secondary" type="button" id="close-order-footer">关闭</button></div>
+      </div>
+    </div>
+  </section>
 
   <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
 </body>

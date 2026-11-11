@@ -3,7 +3,7 @@
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
   const OPERATOR = '运营管理员';
-  const STATUS_LABELS = { enabled: '启用中', disabled: '已停用' };
+  const STATUS_LABELS = { executing: '执行中', enabled: '启用中', disabled: '已停用' };
   const IMPORT_HEADERS = ['规则名称', '活动ID集合', '门店日总数量', '门店月总数量', '柜机日次数', '柜机月次数', 'App日次数', 'App月次数', '状态'];
   const FIELD_DEFS = [
     { key: 'activities', label: '活动 ID 集合' },
@@ -26,6 +26,26 @@
     { id: 'ACT-20261115', name: '家电换新联动', period: '11.15 - 12.05' },
     { id: 'ACT-20261120', name: '年末换新冲刺', period: '11.20 - 12.31' },
     { id: 'ACT-20260901', name: '九月开学换新', period: '已结束' }
+  ];
+
+  const participationOrders = [
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100102', entry: 'app', status: 'frozen', day: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100103', entry: 'cabinet', status: 'participated', day: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100104', entry: 'cabinet', status: 'participated', day: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611100105', entry: 'cabinet', status: 'frozen', day: true },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611080201', entry: 'app', status: 'participated', day: false },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611060118', entry: 'cabinet', status: 'participated', day: false },
+    { ruleId: 'R-001', storeId: 'ST-3101', storeName: '杭州西湖旗舰店', orderId: 'SO202611030076', entry: 'app', status: 'participated', day: false },
+    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611100211', entry: 'app', status: 'frozen', day: true },
+    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611100212', entry: 'app', status: 'participated', day: true },
+    { ruleId: 'R-001', storeId: 'ST-3102', storeName: '上海静安体验店', orderId: 'SO202611050188', entry: 'cabinet', status: 'participated', day: false },
+    { ruleId: 'R-001', storeId: 'ST-3103', storeName: '广州天河门店', orderId: 'SO202611090301', entry: 'cabinet', status: 'frozen', day: false },
+    { ruleId: 'R-001', storeId: 'ST-3103', storeName: '广州天河门店', orderId: 'SO202611020119', entry: 'app', status: 'participated', day: false },
+    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611100401', entry: 'cabinet', status: 'frozen', day: true },
+    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611090402', entry: 'app', status: 'participated', day: false },
+    { ruleId: 'R-002', storeId: 'ST-3201', storeName: '北京朝阳大悦城店', orderId: 'SO202611080403', entry: 'cabinet', status: 'participated', day: false },
+    { ruleId: 'R-002', storeId: 'ST-3202', storeName: '成都春熙路店', orderId: 'SO202611100501', entry: 'app', status: 'participated', day: true },
+    { ruleId: 'R-002', storeId: 'ST-3202', storeName: '成都春熙路店', orderId: 'SO202611070502', entry: 'app', status: 'frozen', day: false }
   ];
 
   const seedLogs = {
@@ -77,13 +97,34 @@
           { field: '状态', before: '—', after: '启用中' }
         ]
       }
+    ],
+    'R-004': [
+      {
+        id: 'LOG-R004-002', action: '开始执行', operator: '系统任务', time: '2026-11-10 15:10', note: '启用后开始回溯当前日/月历史数据，回放期间规则内活动阻断新参与。',
+        changes: [
+          { field: '状态', before: '已停用', after: '执行中' },
+          { field: '执行批次', before: '—', after: 'ACT-20261110-001' },
+          { field: '活动范围', before: '—', after: 'ACT-20261112' },
+          { field: '处理结果', before: '—', after: '历史数据回放进行中' }
+        ]
+      },
+      {
+        id: 'LOG-R004-001', action: '创建规则', operator: '李运营', time: '2026-11-10 15:08', note: '',
+        changes: [
+          { field: '活动 ID 集合', before: '—', after: 'ACT-20261112' },
+          { field: '门店日总数量', before: '—', after: '36 次' },
+          { field: '门店月总数量', before: '—', after: '480 次' },
+          { field: '状态', before: '—', after: '执行中' }
+        ]
+      }
     ]
   };
 
   let rules = [
     { id: 'R-001', name: '双十一换新·门店次数', status: 'enabled', activities: ['ACT-20261101', 'ACT-20261103'], dailyTotal: 50, monthlyTotal: 800, dailyCabinet: 20, monthlyCabinet: 300, dailyApp: 40, monthlyApp: 600, updated: '2026-11-10 14:32', updater: '王运营', logs: seedLogs['R-001'] },
     { id: 'R-002', name: '月中换新·次数兜底', status: 'enabled', activities: ['ACT-20261105', 'ACT-20261108'], dailyTotal: 30, monthlyTotal: 500, dailyCabinet: 12, monthlyCabinet: null, dailyApp: 25, monthlyApp: 400, updated: '2026-11-09 18:05', updater: '陈运营', logs: seedLogs['R-002'] },
-    { id: 'R-003', name: '九月开学换新（已停用）', status: 'disabled', activities: ['ACT-20260901'], dailyTotal: 20, monthlyTotal: 260, dailyCabinet: null, monthlyCabinet: null, dailyApp: 16, monthlyApp: 180, updated: '2026-09-30 17:40', updater: '王运营', logs: seedLogs['R-003'] }
+    { id: 'R-003', name: '九月开学换新（已停用）', status: 'disabled', activities: ['ACT-20260901'], dailyTotal: 20, monthlyTotal: 260, dailyCabinet: null, monthlyCabinet: null, dailyApp: 16, monthlyApp: 180, updated: '2026-09-30 17:40', updater: '王运营', logs: seedLogs['R-003'] },
+    { id: 'R-004', name: '门店焕新·历史回放中', status: 'executing', activities: ['ACT-20261112'], dailyTotal: 36, monthlyTotal: 480, dailyCabinet: 18, monthlyCabinet: 240, dailyApp: 24, monthlyApp: 300, updated: '2026-11-10 15:10', updater: '系统任务', logs: seedLogs['R-004'], initialization: { mode: 'activation', batchId: 'ACT-20261110-001', trigger: '新建后启用', activities: ['ACT-20261112'], demo: true } }
   ];
 
   let activeRuleId = null;
@@ -91,6 +132,10 @@
   let pendingImport = null;
   let logSequence = 100;
   let importSequence = 1;
+  let activationSequence = 1;
+  let participationReturnFocus = null;
+  let orderReturnFocus = null;
+  let currentParticipationRuleId = null;
 
   const form = $('#rule-form');
   const drawer = $('#rule-drawer');
@@ -111,6 +156,14 @@
   const confirmImportButton = $('#confirm-import');
   const logDrawer = $('#log-drawer');
   const logBackdrop = $('#log-backdrop');
+  const participationModal = $('#participation-modal');
+  const participationBackdrop = $('#participation-backdrop');
+  const participationTableWrap = $('#participation-table-wrap');
+  const participationEmpty = $('#participation-empty');
+  const orderModal = $('#order-modal');
+  const orderBackdrop = $('#order-backdrop');
+  const orderTableWrap = $('#order-table-wrap');
+  const orderEmpty = $('#order-empty');
 
   const activityById = (id) => activities.find((activity) => activity.id === id);
   const displayName = (rule) => rule.name?.trim() || `未命名次数规则 ${rule.id}`;
@@ -172,17 +225,55 @@
     changes
   });
 
-  const makeActivationLog = (rule, trigger, activityIds = rule.activities) => {
+  const activationPeriods = () => {
     const date = new Date();
     const pad = (value) => String(value).padStart(2, '0');
     const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
     const month = `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
-    return makeLog('生效初始化', [
+    return { day, month };
+  };
+
+  const makeActivationStartLog = (rule, trigger, activityIds = rule.activities, batchId = '', mode = 'activation') => {
+    const { day, month } = activationPeriods();
+    return makeLog('开始执行', [
+      { field: '状态', before: mode === 'incremental' ? '启用中' : '已停用', after: mode === 'incremental' ? '启用中（新增活动初始化中）' : '执行中' },
+      { field: '执行批次', before: '—', after: batchId || '—' },
       { field: '初始化周期', before: '—', after: `${day}（日）、${month}（月）` },
       { field: '活动范围', before: '—', after: activityIds.join('、') },
-      { field: '统计截至', before: '—', after: '规则生效时刻（不含）' },
-      { field: '处理结果', before: '—', after: '成功，期初用量已纳入当前次数' }
-    ], `${trigger}：回溯当前日/月历史成交并补建在途预占；查询失败时阻断生效，重复执行不重复计数。`, '系统任务');
+      { field: '处理结果', before: '—', after: mode === 'incremental' ? '新增活动初始化中，原活动继续执行' : '历史数据回放进行中，规则内活动阻断新参与' }
+    ], `${trigger}：回溯当前日/月历史成交并补建冻结订单；回放完成前不会切换为启用中。`, '系统任务');
+  };
+
+  const makeActivationCompleteLog = (rule, trigger, activityIds = rule.activities, batchId = '', mode = 'activation') => {
+    const { day, month } = activationPeriods();
+    return makeLog('初始化完成', [
+      { field: '状态', before: mode === 'incremental' ? '启用中（新增活动初始化中）' : '执行中', after: '启用中' },
+      { field: '执行批次', before: batchId || '—', after: batchId || '—' },
+      { field: '初始化周期', before: `${day}（日）、${month}（月）`, after: `${day}（日）、${month}（月）` },
+      { field: '活动范围', before: activityIds.join('、'), after: activityIds.join('、') },
+      { field: '处理结果', before: '历史数据回放中', after: '成功，期初用量与冻结订单已纳入当前参与数量' }
+    ], `${trigger}：历史数据回放完成，规则开始执行次数校验和冻结。`, '系统任务');
+  };
+
+  const scheduleActivationCompletion = (ruleId, batchId, delay = 2600) => {
+    window.setTimeout(() => {
+      const rule = rules.find((item) => item.id === ruleId);
+      const initialization = rule?.initialization;
+      if (!rule || !initialization || initialization.batchId !== batchId) return;
+      const { mode, trigger, activities: initializedActivities } = initialization;
+      rule.status = 'enabled';
+      const completeLog = makeActivationCompleteLog(rule, trigger, initializedActivities, batchId, mode);
+      rule.logs = [completeLog, ...(rule.logs || [])];
+      rule.updated = completeLog.time;
+      rule.updater = '系统任务';
+      delete rule.initialization;
+      renderRules();
+      if (!logDrawer.hidden && $('#log-drawer-subtitle').textContent.includes(rule.id)) renderRuleLogs(rule);
+      if (!participationModal.hidden && currentParticipationRuleId === rule.id) renderParticipation(rule);
+      toast(mode === 'incremental'
+        ? `“${displayName(rule)}”新增活动初始化完成，已开始执行次数规则。`
+        : `“${displayName(rule)}”历史数据回放完成，已由执行中变为启用中。`);
+    }, delay);
   };
 
   const summarizeLog = (log) => {
@@ -193,16 +284,36 @@
 
   const updateMetrics = () => {
     const activitiesUsed = new Set(rules.flatMap((rule) => rule.activities));
-    const overlap = rules.flatMap((rule) => rule.activities).filter((activityId) => rules.filter((rule) => rule.activities.includes(activityId)).length > 1);
     $('#metric-rules').textContent = rules.length;
     $('#metric-enabled').textContent = rules.filter((rule) => rule.status === 'enabled').length;
+    $('#metric-executing').textContent = rules.filter((rule) => rule.status === 'executing').length;
     $('#metric-activities').textContent = activitiesUsed.size;
-    $('#metric-conflicts').textContent = new Set(overlap).size;
     $('#menu-rule-count').textContent = rules.length;
   };
 
   const dailyText = (value) => value ? `${value} / 日` : '不执行';
   const monthlyText = (value) => value ? `${value} / 月` : '不执行';
+
+  const ordersForRule = (ruleId) => participationOrders.filter((order) => order.ruleId === ruleId);
+
+  const participationCount = (orders, period, entry = 'total') => {
+    const inPeriod = orders.filter((order) => period === 'month' || order.day);
+    const entryOrders = entry === 'total' ? inPeriod : inPeriod.filter((order) => order.entry === entry);
+    const frozen = entryOrders.filter((order) => order.status === 'frozen').length;
+    const participated = entryOrders.filter((order) => order.status === 'participated').length;
+    return { total: frozen + participated, frozen, participated };
+  };
+
+  const participationStores = (ruleId) => {
+    const storeMap = new Map();
+    ordersForRule(ruleId).forEach((order) => {
+      if (!storeMap.has(order.storeId)) {
+        storeMap.set(order.storeId, { storeId: order.storeId, storeName: order.storeName, orders: [] });
+      }
+      storeMap.get(order.storeId).orders.push(order);
+    });
+    return [...storeMap.values()];
+  };
 
   const renderRules = () => {
     const query = searchInput.value.trim().toLowerCase();
@@ -218,6 +329,12 @@
       const tags = rule.activities.slice(0, 2).map((id) => `<span class="activity-tag" title="${escapeHtml(formatActivity(id))}">${escapeHtml(id)}</span>`).join('');
       const more = rule.activities.length > 2 ? `<span class="activity-tag more">+${rule.activities.length - 2}</span>` : '';
       const nextStatus = rule.status === 'enabled' ? 'disabled' : 'enabled';
+      const incrementalInitializing = rule.status === 'enabled' && rule.initialization?.mode === 'incremental';
+      const actionsLocked = rule.status === 'executing' || incrementalInitializing;
+      const statusNote = rule.status === 'executing'
+        ? '<span class="status-note">历史数据处理中</span>'
+        : incrementalInitializing ? '<span class="status-note">新增活动初始化中</span>' : '';
+      const storeCount = participationStores(rule.id).length;
       const latestLog = rule.logs?.[0];
       const logCount = rule.logs?.length || 0;
       const logCell = latestLog ? `
@@ -233,9 +350,10 @@
           <td class="limit-cell"><strong>${dailyText(rule.dailyTotal)}</strong><small>${monthlyText(rule.monthlyTotal)}</small></td>
           <td class="limit-cell"><strong>${dailyText(rule.dailyCabinet)}</strong><small>${monthlyText(rule.monthlyCabinet)}</small></td>
           <td class="limit-cell"><strong>${dailyText(rule.dailyApp)}</strong><small>${monthlyText(rule.monthlyApp)}</small></td>
-          <td><span class="status-text ${rule.status}">${statusLabel(rule.status)}</span></td>
+          <td><div class="status-stack"><span class="status-text ${rule.status}">${statusLabel(rule.status)}</span>${statusNote}</div></td>
+          <td><button class="participation-link" type="button" data-participation="${rule.id}" aria-label="查看“${escapeHtml(displayName(rule))}”的参与详情"><span>参与详情</span><small>${storeCount ? `${storeCount} 家门店` : '暂无数据'}</small></button></td>
           <td>${logCell}</td>
-          <td class="actions-col"><div class="row-actions"><button class="link-button" type="button" data-edit="${rule.id}">编辑</button><button class="link-button ${nextStatus === 'disabled' ? 'danger' : ''}" type="button" data-toggle="${rule.id}">${nextStatus === 'disabled' ? '停用' : '启用'}</button></div></td>
+          <td class="actions-col">${actionsLocked ? `<span class="action-note">${rule.status === 'executing' ? '历史数据处理中' : '新增活动初始化中'}</span>` : `<div class="row-actions"><button class="link-button" type="button" data-edit="${rule.id}">编辑</button><button class="link-button ${nextStatus === 'disabled' ? 'danger' : ''}" type="button" data-toggle="${rule.id}">${nextStatus === 'disabled' ? '停用' : '启用'}</button></div>`}</td>
         </tr>`;
     }).join('');
 
@@ -251,7 +369,7 @@
   };
 
   const syncBodyOverflow = () => {
-    const hasOpenDialog = [drawer, importDrawer, logDrawer].some((node) => node && !node.hidden);
+    const hasOpenDialog = [drawer, importDrawer, logDrawer, participationModal, orderModal].some((node) => node && !node.hidden);
     document.body.style.overflow = hasOpenDialog ? 'hidden' : '';
   };
 
@@ -323,6 +441,16 @@
   };
 
   const openDrawer = (rule = null) => {
+    if (rule?.status === 'executing') {
+      toast('规则正在执行历史数据回放，完成前不可编辑或重复启停。', 'error');
+      return;
+    }
+    if (rule?.initialization?.mode === 'incremental') {
+      toast('新增活动正在初始化，完成前不可修改规则。', 'error');
+      return;
+    }
+    closeParticipation(false);
+    closeOrderDetails(false);
     closeLogDrawer();
     closeImportDrawer(true);
     activeRuleId = rule?.id || null;
@@ -438,14 +566,21 @@
     event.preventDefault();
     if (!validateForm()) return;
     const quotas = collectQuotas().quotas;
-    const status = $('input[name="rule-status"]:checked')?.value || 'enabled';
+    const requestedStatus = $('input[name="rule-status"]:checked')?.value || 'enabled';
     const id = activeRuleId || nextRuleId();
     const name = $('#rule-name').value.trim() || `未命名次数规则 ${id}`;
     const previousRule = rules.find((rule) => rule.id === activeRuleId);
+    const addedActivities = previousRule ? formActivities.filter((activityId) => !previousRule.activities.includes(activityId)) : [...formActivities];
+    const needsInitialExecution = requestedStatus === 'enabled' && (!previousRule || previousRule.status !== 'enabled');
+    const needsIncrementalInitialization = requestedStatus === 'enabled' && previousRule?.status === 'enabled' && addedActivities.length > 0;
+    const needsActivationInit = needsInitialExecution || needsIncrementalInitialization;
+    const initializationMode = needsIncrementalInitialization ? 'incremental' : 'activation';
+    const activationTrigger = !previousRule ? '首次启用' : previousRule.status !== 'enabled' ? '停用后重新启用' : '已启用规则新增活动';
+    const activationBatchId = needsActivationInit ? nextActivationId() : null;
     const payload = {
       id,
       name,
-      status,
+      status: needsInitialExecution ? 'executing' : requestedStatus,
       activities: [...formActivities],
       ...quotas,
       updated: '',
@@ -457,23 +592,33 @@
       return;
     }
     const log = makeLog(previousRule ? '编辑规则' : '创建规则', changes);
-    const addedActivities = previousRule ? payload.activities.filter((activityId) => !previousRule.activities.includes(activityId)) : payload.activities;
-    const needsActivationInit = status === 'enabled' && (!previousRule || previousRule.status !== 'enabled' || addedActivities.length > 0);
-    const activationTrigger = !previousRule ? '首次启用' : previousRule.status !== 'enabled' ? '停用后重新启用' : '已启用规则新增活动';
-    const initLog = needsActivationInit ? makeActivationLog(payload, activationTrigger, addedActivities) : null;
-    payload.logs = [initLog, log, ...(previousRule?.logs || [])].filter(Boolean);
+    const startLog = needsActivationInit
+      ? makeActivationStartLog(payload, activationTrigger, addedActivities, activationBatchId, initializationMode)
+      : null;
+    if (needsActivationInit) {
+      payload.initialization = {
+        mode: initializationMode,
+        batchId: activationBatchId,
+        trigger: activationTrigger,
+        activities: [...addedActivities]
+      };
+    }
+    payload.logs = [startLog, log, ...(previousRule?.logs || [])].filter(Boolean);
     payload.updated = payload.logs[0].time;
     if (previousRule) {
       rules = rules.map((rule) => rule.id === activeRuleId ? payload : rule);
-      toast(initLog
-        ? `已更新“${payload.name}”，并完成${activationTrigger}的当前日/月期初初始化。`
-        : `已更新“${payload.name}”，变更已写入操作日志。`);
+      toast(needsInitialExecution
+        ? `已更新“${payload.name}”，规则进入执行中；历史数据回放完成后自动启用。`
+        : needsIncrementalInitialization
+          ? `已更新“${payload.name}”，新增活动初始化中；原有活动继续执行。`
+          : `已更新“${payload.name}”，变更已写入操作日志。`);
     } else {
       rules = [payload, ...rules];
-      toast(initLog
-        ? `已创建“${payload.name}”，完成当前日/月期初初始化后生效。`
+      toast(needsInitialExecution
+        ? `已创建“${payload.name}”，规则进入执行中；历史数据回放完成后自动启用。`
         : `已创建“${payload.name}”，并记录初始配置日志。`);
     }
+    if (needsActivationInit) scheduleActivationCompletion(payload.id, activationBatchId);
     renderRules();
     closeDrawer();
   };
@@ -481,21 +626,37 @@
   const toggleRule = (id) => {
     const rule = rules.find((item) => item.id === id);
     if (!rule) return;
+    if (rule.status === 'executing' || rule.initialization) {
+      toast('规则正在处理初始化任务，完成前不可重复启停。', 'error');
+      return;
+    }
     const before = rule.status;
-    rule.status = rule.status === 'enabled' ? 'disabled' : 'enabled';
-    const log = makeLog(rule.status === 'enabled' ? '启用规则' : '停用规则', [{
-      field: '状态',
-      before: statusLabel(before),
-      after: statusLabel(rule.status)
-    }], '启停只影响后续新订单，历史计数和活动占用关系保持不变。');
-    const initLog = rule.status === 'enabled' ? makeActivationLog(rule, '停用后重新启用') : null;
-    rule.logs = [initLog, log, ...(rule.logs || [])].filter(Boolean);
-    rule.updated = rule.logs[0].time;
+    if (before === 'enabled') {
+      rule.status = 'disabled';
+      const log = makeLog('停用规则', [{
+        field: '状态', before: statusLabel(before), after: statusLabel(rule.status)
+      }], '启停只影响后续新订单，历史参与数量和活动占用关系保持不变。');
+      rule.logs = [log, ...(rule.logs || [])];
+      rule.updated = log.time;
+      rule.updater = OPERATOR;
+      renderRules();
+      toast(`“${displayName(rule)}”已停用，变更已写入操作日志。`);
+      return;
+    }
+
+    const batchId = nextActivationId();
+    rule.status = 'executing';
+    rule.initialization = { mode: 'activation', batchId, trigger: '停用后重新启用', activities: [...rule.activities] };
+    const enableLog = makeLog('启用规则', [{
+      field: '状态', before: statusLabel(before), after: '执行中'
+    }], '启用后先执行当前日/月历史数据回放，完成前不开始执行次数规则。');
+    const startLog = makeActivationStartLog(rule, '停用后重新启用', rule.activities, batchId, 'activation');
+    rule.logs = [startLog, enableLog, ...(rule.logs || [])];
+    rule.updated = startLog.time;
     rule.updater = OPERATOR;
     renderRules();
-    toast(initLog
-      ? `“${displayName(rule)}”已完成当前日/月期初初始化并启用。`
-      : `“${displayName(rule)}”已停用，变更已写入操作日志。`);
+    scheduleActivationCompletion(rule.id, batchId);
+    toast(`“${displayName(rule)}”已进入执行中，历史数据回放完成后自动启用。`);
   };
 
   const closeLogDrawer = () => {
@@ -528,6 +689,8 @@
   const openLogDrawer = (id) => {
     const rule = rules.find((item) => item.id === id);
     if (!rule) return;
+    closeOrderDetails(false);
+    closeParticipation(false);
     closeDrawer();
     closeImportDrawer(true);
     renderRuleLogs(rule);
@@ -535,6 +698,107 @@
     logDrawer.hidden = false;
     syncBodyOverflow();
     window.requestAnimationFrame(() => $('#close-log-drawer').focus());
+  };
+
+  const countCell = ({ total, frozen, participated }) => `
+    <span class="count-total">${total} 次</span>
+    <span class="count-split">冻结 ${frozen} · 已参与 ${participated}</span>`;
+
+  const renderParticipation = (rule) => {
+    const stores = participationStores(rule.id);
+    const { day, month } = activationPeriods();
+    $('#participation-modal-subtitle').textContent = `${displayName(rule)} · ${rule.id} · 数量包含冻结中与已参与（成交）订单`;
+    $('#participation-rule-name').textContent = `${displayName(rule)}（${rule.id}）`;
+    $('#participation-rule-status').textContent = statusLabel(rule.status);
+    $('#participation-period').textContent = `${day}（日） / ${month}（月）`;
+    $('#participation-foot-count').textContent = `共 ${stores.length} 家门店`;
+
+    const hasData = stores.length > 0;
+    participationTableWrap.hidden = !hasData;
+    participationEmpty.hidden = hasData;
+    $('#participation-body').innerHTML = stores.map((store) => {
+      const orders = store.orders;
+      return `<tr>
+        <td><span class="detail-store-name">${escapeHtml(store.storeName)}</span><span class="detail-store-id">${escapeHtml(store.storeId)}</span></td>
+        <td>${countCell(participationCount(orders, 'day', 'cabinet'))}</td>
+        <td>${countCell(participationCount(orders, 'day', 'app'))}</td>
+        <td>${countCell(participationCount(orders, 'day', 'total'))}</td>
+        <td>${countCell(participationCount(orders, 'month', 'total'))}</td>
+        <td>${countCell(participationCount(orders, 'month', 'cabinet'))}</td>
+        <td>${countCell(participationCount(orders, 'month', 'app'))}</td>
+        <td><button class="detail-order-button" type="button" data-orders="${rule.id}" data-store-id="${escapeHtml(store.storeId)}">查看明细</button></td>
+      </tr>`;
+    }).join('');
+
+    if (!hasData) {
+      $('#participation-empty-copy').textContent = rule.status === 'executing'
+        ? '规则仍在执行历史数据回放，尚未开始执行次数规则，因此暂无参与数据。'
+        : '当前周期内还没有冻结中或已参与订单。';
+    }
+  };
+
+  const openParticipation = (ruleId, trigger) => {
+    const rule = rules.find((item) => item.id === ruleId);
+    if (!rule) return;
+    closeDrawer();
+    closeImportDrawer(true);
+    closeLogDrawer();
+    closeOrderDetails(false);
+    participationReturnFocus = trigger || document.activeElement;
+    currentParticipationRuleId = rule.id;
+    renderParticipation(rule);
+    participationBackdrop.hidden = false;
+    participationModal.hidden = false;
+    syncBodyOverflow();
+    window.requestAnimationFrame(() => $('#close-participation').focus());
+  };
+
+  const closeParticipation = (restoreFocus = true) => {
+    closeOrderDetails(false);
+    participationModal.hidden = true;
+    participationBackdrop.hidden = true;
+    syncBodyOverflow();
+    if (restoreFocus && participationReturnFocus) participationReturnFocus.focus();
+    participationReturnFocus = null;
+    currentParticipationRuleId = null;
+  };
+
+  const renderOrderDetails = (rule, storeId) => {
+    const storeOrders = ordersForRule(rule.id).filter((order) => order.storeId === storeId);
+    const storeName = storeOrders[0]?.storeName || '未知门店';
+    const uniqueOrders = [...new Map(storeOrders.map((order) => [order.orderId, order])).values()];
+    $('#order-modal-subtitle').textContent = `${storeName} · 仅展示冻结中与已参与订单`;
+    $('#order-store-name').textContent = storeName;
+    $('#order-rule-name').textContent = `${displayName(rule)}（${rule.id}）`;
+    $('#order-total-count').textContent = `${uniqueOrders.length} 笔`;
+    $('#order-foot-count').textContent = `共 ${uniqueOrders.length} 笔订单`;
+    orderTableWrap.hidden = uniqueOrders.length === 0;
+    orderEmpty.hidden = uniqueOrders.length > 0;
+    $('#order-body').innerHTML = uniqueOrders.map((order) => `
+      <tr>
+        <td><span class="detail-store-name">${escapeHtml(storeName)}</span></td>
+        <td><span class="order-number">${escapeHtml(order.orderId)}</span></td>
+        <td><span class="participation-badge ${order.status}">${order.status === 'frozen' ? '冻结中' : '已参与'}</span></td>
+      </tr>`).join('');
+  };
+
+  const openOrderDetails = (ruleId, storeId, trigger) => {
+    const rule = rules.find((item) => item.id === ruleId);
+    if (!rule) return;
+    orderReturnFocus = trigger || document.activeElement;
+    renderOrderDetails(rule, storeId);
+    orderBackdrop.hidden = false;
+    orderModal.hidden = false;
+    syncBodyOverflow();
+    window.requestAnimationFrame(() => $('#close-order').focus());
+  };
+
+  const closeOrderDetails = (restoreFocus = true) => {
+    orderModal.hidden = true;
+    orderBackdrop.hidden = true;
+    syncBodyOverflow();
+    if (restoreFocus && orderReturnFocus) orderReturnFocus.focus();
+    orderReturnFocus = null;
   };
 
   const nextRuleId = (usedIds = new Set(rules.map((rule) => rule.id))) => {
@@ -549,6 +813,12 @@
     const date = new Date();
     const day = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
     return `IMP-${day}-${String(importSequence++).padStart(3, '0')}`;
+  };
+
+  const nextActivationId = () => {
+    const date = new Date();
+    const day = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+    return `ACT-${day}-${String(activationSequence++).padStart(3, '0')}`;
   };
 
   const parseDelimitedLine = (line, delimiter = ',') => {
@@ -710,7 +980,7 @@
         <td>${row.dailyTotal ?? '缺失'} / ${row.monthlyTotal ?? '缺失'}</td>
         <td>${row.dailyCabinet ?? '—'} / ${row.monthlyCabinet ?? '—'}</td>
         <td>${row.dailyApp ?? '—'} / ${row.monthlyApp ?? '—'}</td>
-        <td>${statusLabel(row.status)}</td>
+        <td>${row.status === 'enabled' ? '启用（执行中）' : '停用'}</td>
       </tr>`).join('');
     importMore.hidden = result.rows.length <= 20;
     importMore.textContent = result.rows.length > 20 ? `仅展示前 20 行，另有 ${result.rows.length - 20} 行待导入。` : '';
@@ -736,6 +1006,8 @@
   };
 
   const openImportDrawer = () => {
+    closeParticipation(false);
+    closeOrderDetails(false);
     closeDrawer();
     closeLogDrawer();
     resetImportForm();
@@ -754,12 +1026,15 @@
     }
     const batchId = nextBatchId();
     const usedIds = new Set(rules.map((rule) => rule.id));
+    const pendingActivations = [];
     const importedRules = result.rows.map((row) => {
       const id = nextRuleId(usedIds);
+      const shouldActivate = row.status === 'enabled';
+      const activationBatchId = shouldActivate ? nextActivationId() : null;
       const rule = {
         id,
         name: row.name || `未命名次数规则 ${id}`,
-        status: row.status,
+        status: shouldActivate ? 'executing' : 'disabled',
         activities: [...row.activities],
         dailyTotal: row.dailyTotal,
         monthlyTotal: row.monthlyTotal,
@@ -772,15 +1047,27 @@
         logs: []
       };
       const log = makeLog('批量导入创建', createChanges(rule), `导入批次 ${batchId}`);
-      const initLog = rule.status === 'enabled' ? makeActivationLog(rule, `批量导入启用（${batchId}）`) : null;
-      rule.logs = [initLog, log].filter(Boolean);
+      const startLog = shouldActivate
+        ? makeActivationStartLog(rule, `批量导入启用（${batchId}）`, rule.activities, activationBatchId, 'activation')
+        : null;
+      if (shouldActivate) {
+        rule.initialization = {
+          mode: 'activation',
+          batchId: activationBatchId,
+          trigger: `批量导入启用（${batchId}）`,
+          activities: [...rule.activities]
+        };
+        pendingActivations.push({ ruleId: id, batchId: activationBatchId });
+      }
+      rule.logs = [startLog, log].filter(Boolean);
       rule.updated = rule.logs[0].time;
       return rule;
     });
     rules = [...importedRules, ...rules];
+    pendingActivations.forEach(({ ruleId, batchId: activationBatchId }) => scheduleActivationCompletion(ruleId, activationBatchId));
     renderRules();
     closeImportDrawer(true);
-    toast(`已通过 ${batchId} 导入 ${importedRules.length} 条规则；启用规则已完成当前日/月期初初始化。`);
+    toast(`已通过 ${batchId} 导入 ${importedRules.length} 条规则；启用项已进入执行中，回放完成后自动启用。`);
   };
 
   const downloadTemplate = () => {
@@ -823,15 +1110,29 @@
   $('#close-log-drawer')?.addEventListener('click', closeLogDrawer);
   $('#close-log-footer')?.addEventListener('click', closeLogDrawer);
   logBackdrop?.addEventListener('click', closeLogDrawer);
+  $('#close-participation')?.addEventListener('click', () => closeParticipation());
+  $('#close-participation-footer')?.addEventListener('click', () => closeParticipation());
+  participationBackdrop?.addEventListener('click', () => closeParticipation());
+  $('#close-order')?.addEventListener('click', () => closeOrderDetails());
+  $('#close-order-footer')?.addEventListener('click', () => closeOrderDetails());
+  $('#back-to-participation')?.addEventListener('click', () => closeOrderDetails());
+  orderBackdrop?.addEventListener('click', () => closeOrderDetails());
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    if (!logDrawer.hidden) closeLogDrawer();
+    if (!orderModal.hidden) closeOrderDetails();
+    else if (!participationModal.hidden) closeParticipation();
+    else if (!logDrawer.hidden) closeLogDrawer();
     else if (!importDrawer.hidden) closeImportDrawer(true);
     else if (!drawer.hidden) closeDrawer();
   });
   form?.addEventListener('submit', saveRule);
 
   $('#rules-body')?.addEventListener('click', (event) => {
+    const participationButton = event.target.closest('[data-participation]');
+    if (participationButton) {
+      openParticipation(participationButton.dataset.participation, participationButton);
+      return;
+    }
     const logButton = event.target.closest('[data-log]');
     if (logButton) {
       openLogDrawer(logButton.dataset.log);
@@ -845,6 +1146,11 @@
     }
     const toggleButton = event.target.closest('[data-toggle]');
     if (toggleButton) toggleRule(toggleButton.dataset.toggle);
+  });
+
+  $('#participation-body')?.addEventListener('click', (event) => {
+    const orderButton = event.target.closest('[data-orders]');
+    if (orderButton) openOrderDetails(orderButton.dataset.orders, orderButton.dataset.storeId, orderButton);
   });
 
   searchInput?.addEventListener('input', renderRules);
