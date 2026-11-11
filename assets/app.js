@@ -112,11 +112,11 @@
     }
 
     if (simulator.limits.total !== null && totalUsed >= simulator.limits.total) {
-      setMessage(`本次${label}进入顾客信息页被拦截：${quotaBlockMessage(entry)}`, 'error');
+      setMessage(`本次${label}在活动选择页被拦截：${quotaBlockMessage(entry)}`, 'error');
       return;
     }
     if (simulator.limits[entry] !== null && simulator.used[entry] >= simulator.limits[entry]) {
-      setMessage(`本次${label}进入顾客信息页被拦截：${quotaBlockMessage(entry)}`, 'error');
+      setMessage(`本次${label}在活动选择页被拦截：${quotaBlockMessage(entry)}`, 'error');
       return;
     }
 

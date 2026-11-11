@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：支持日、自然周、月三周期次数按需配置，覆盖活动 ID 唯一占用、进入顾客信息页前置拦截、App 专属提示、执行中初始化、参与详情、批量导入和操作日志。">
+  <meta name="description" content="门店换新活动参与次数限制配置菜单交互原型：支持日、自然周、月三周期次数按需配置，覆盖活动 ID 唯一占用、活动选择页前置拦截、App 专属提示、执行中初始化、参与详情、批量导入和操作日志。">
   <title>换新活动次数限制｜配置菜单原型</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314785b'/%3E%3Cpath d='M18 20h28v8H18zm0 16h12v8H18zm17 0h11v8H35z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="prototype.css?v=20261111-14">
@@ -43,8 +43,8 @@
 
       <section class="page-heading" aria-labelledby="page-title">
         <div>
-          <div class="title-line"><h1 id="page-title">换新活动次数限制</h1><span class="draft-badge">配置原型</span></div>
-          <p>将多个活动组合为一条次数限制规则，按门店统计冻结中与已参与订单。进入顾客信息页前先校验次数，App 命中限制时引导至柜机；提交订单仍执行原子冻结。</p>
+          <div class="title-line"><h1 id="page-title">换新活动次数限制</h1><span class="draft-badge">配置原型 · v1.2</span></div>
+          <p>将多个活动组合为一条次数限制规则，按门店统计冻结中与已参与订单。用户在活动选择页选择活动时先校验次数，App 命中限制时引导至柜机；提交订单仍执行原子冻结。</p>
         </div>
         <div class="heading-actions">
           <button class="button secondary" type="button" id="open-import">
@@ -71,16 +71,16 @@
       <section class="frontend-gate-preview" aria-labelledby="frontend-gate-title">
         <div class="frontend-gate-copy">
           <span class="kicker">FRONT-END GATE</span>
-          <h2 id="frontend-gate-title">进入顾客信息页前先拦截</h2>
-          <p>用户点击“进入顾客信息页”时执行前置次数校验。校验不冻结次数；通过后仍须在提交订单时执行原子冻结。App 命中限制时展示专属文案，柜机使用通用文案。</p>
+          <h2 id="frontend-gate-title">在活动选择页先拦截</h2>
+          <p>用户在活动选择页选择活动并点击“参与活动”时执行前置次数校验；未通过则停留在该页面，不进入顾客信息页。校验不冻结次数，通过后仍须在提交订单时执行原子冻结。App 命中限制时展示专属文案，柜机使用通用文案。</p>
           <ol class="frontend-gate-steps">
-            <li><span>01</span>选择活动并识别门店、入口、订单归宿</li>
-            <li class="is-gate"><span>02</span>进入顾客信息页时校验次数</li>
-            <li><span>03</span>通过后填写信息，提交时再次硬校验</li>
+            <li><span>01</span>打开活动选择页并选择活动</li>
+            <li class="is-gate"><span>02</span>点击“参与活动”时校验次数</li>
+            <li><span>03</span>通过后填写顾客信息，提交时再次硬校验</li>
           </ol>
         </div>
-        <div class="frontend-gate-demo" role="group" aria-label="App 进入顾客信息页拦截弹窗示意">
-          <div class="frontend-gate-demo-head"><span>APP · 顾客信息</span><em>拦截示意</em></div>
+        <div class="frontend-gate-demo" role="group" aria-label="App 活动选择页拦截弹窗示意">
+          <div class="frontend-gate-demo-head"><span>APP · 活动选择页</span><em>拦截示意</em></div>
           <div class="frontend-gate-alert">
             <span aria-hidden="true">!</span>
             <div><strong>暂不能继续办理</strong><p>APP端办单限量开启，请移步柜机端办理。</p><small>柜机次数独立校验；若也耗尽，将展示柜机通用提示。</small></div>
